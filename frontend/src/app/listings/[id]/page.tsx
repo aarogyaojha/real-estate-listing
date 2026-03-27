@@ -8,6 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { AdminPanel } from '@/components/AdminPanel';
 import { EnquiryForm } from '@/components/EnquiryForm';
+import { MortgageCalculator } from '@/components/MortgageCalculator';
 import { useListing } from '@/hooks/useListing';
 import { useAuth } from '@/hooks/useAuth';
 
@@ -105,6 +106,8 @@ export default function ListingDetailPage() {
           <EnquiryForm agentId={listing.agent.id} listingId={listing.id} />
         </div>
       )}
+
+      <MortgageCalculator price={listing.price} />
 
       {user?.role === 'ADMIN' && listing.status && (
         <AdminPanel status={listing.status} internalNotes={listing.internalNotes} />
