@@ -4,7 +4,7 @@ import { ListingCard } from '../components/ListingCard';
 
 const mockListing = {
   id: 'test-uuid',
-  title: 'Beautiful House in Kathmandu',
+  title: 'Beautiful Suburban Home',
   price: 15000000,
   suburb: 'Kathmandu',
   state: 'Bagmati',
@@ -22,7 +22,7 @@ jest.mock('next/link', () => {
 describe('ListingCard', () => {
   it('renders title', () => {
     render(<ListingCard listing={mockListing} />);
-    expect(screen.getByText('Beautiful House in Kathmandu')).toBeInTheDocument();
+    expect(screen.getByText('Beautiful Suburban Home')).toBeInTheDocument();
   });
 
   it('renders price formatted as NPR X,XX,XXX', () => {
@@ -32,7 +32,7 @@ describe('ListingCard', () => {
 
   it('renders suburb', () => {
     render(<ListingCard listing={mockListing} />);
-    expect(screen.getByText(/Kathmandu/)).toBeInTheDocument();
+    expect(screen.getByText(/Kathmandu.*Bagmati/)).toBeInTheDocument();
   });
 
   it('renders correct bed count', () => {
