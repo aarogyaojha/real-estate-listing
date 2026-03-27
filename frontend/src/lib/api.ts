@@ -124,6 +124,10 @@ export async function updateAgent(id: string, body: Record<string, any>) {
   return apiFetch<any>(`/agents/${id}`, { method: 'PATCH', body: JSON.stringify(body) });
 }
 
+export async function fetchSimilarListings(id: string) {
+  return apiFetch<any[]>(`/listings/${id}/similar`);
+}
+
 export async function login(body: { username: string; password: string }) {
   return apiFetch<any>('/auth/login', {
     method: 'POST',

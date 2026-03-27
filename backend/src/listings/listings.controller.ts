@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Query, Param, UseGuards, ForbiddenException } from '@nestjs/common';
+import { Controller, Get, Post, Body, Query, Param, UseGuards, ForbiddenException, Delete, Patch } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiQuery, ApiResponse, ApiParam, ApiCookieAuth, ApiBody } from '@nestjs/swagger';
 import { ListingsService } from './listings.service';
 import { SearchListingsDto } from './dto/search-listings.dto';
@@ -6,6 +6,8 @@ import { CreateListingDto } from './dto/create-listing.dto';
 import { ListingResponseDto } from './dto/listing-response.dto';
 import { OptionalJwtGuard } from '../auth/guards/optional-jwt.guard';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { RolesGuard } from '../auth/guards/roles.guard';
+import { Roles } from '../auth/decorators/roles.decorator';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
 import { PropertyType, UserRole } from '@prisma/client';
 
@@ -51,6 +53,22 @@ export class ListingsController {
   @ApiResponse({ status: 200 })
   async getSuburbs() {
     return this.listingsService.getSuburbs();
+  }
+
+  @Delete(':id')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN)
+  @ApiOperation({ summary: 'Delete a listing (Admin only)' })
+  @ApiResponse({ status: 200, description: 'Listing deleted' })
+  async remove(@Param('id') id: string) {
+    return this.listingsService.remove(id);
+  }
+
+  @Get(':id/similar')
+  @ApiOperation({ summary: 'Get similar listings' })
+  @ApiResponse({ status: 200, description: 'Similar listings array' })
+  async getSimilar(@Param('id') id: string) {
+    return this.listingsService.findSimilar(id);
   }
 
   @Get('saved')

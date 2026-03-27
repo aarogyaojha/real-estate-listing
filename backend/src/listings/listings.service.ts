@@ -177,4 +177,45 @@ export class ListingsService {
     }
     return publicFields as any;
   }
+
+  async remove(id: string) {
+    return this.prisma.listing.delete({ where: { id } });
+  }
+
+  async findSimilar(id: string) {
+    const listing = await this.prisma.listing.findUnique({ where: { id } });
+    if (!listing) throw new NotFoundException('Listing not found');
+
+    // 1. Same property type and suburb
+    let similar = await this.prisma.listing.findMany({
+      where: {
+        id: { not: id },
+        propertyType: listing.propertyType,
+        suburb: listing.suburb,
+        status: 'ACTIVE',
+      },
+      take: 3,
+      orderBy: { listedAt: 'desc' },
+    });
+
+    // 2. Fallback to same type + within price range (+/- 20%)
+    if (similar.length < 3) {
+      const priceMin = Number(listing.price) * 0.8;
+      const priceMax = Number(listing.price) * 1.2;
+      
+      const additional = await this.prisma.listing.findMany({
+        where: {
+          id: { notIn: [id, ...similar.map(l => l.id)] },
+          propertyType: listing.propertyType,
+          price: { gte: priceMin, lte: priceMax },
+          status: 'ACTIVE',
+        },
+        take: 3 - similar.length,
+        orderBy: { listedAt: 'desc' },
+      });
+      similar = [...similar, ...additional];
+    }
+
+    return similar.map(l => this.sanitize(l, false));
+  }
 }

@@ -9,6 +9,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { AdminPanel } from '@/components/AdminPanel';
 import { EnquiryForm } from '@/components/EnquiryForm';
 import { MortgageCalculator } from '@/components/MortgageCalculator';
+import { SimilarListings } from '@/components/SimilarListings';
 import { useListing } from '@/hooks/useListing';
 import { useAuth } from '@/hooks/useAuth';
 
@@ -112,6 +113,8 @@ export default function ListingDetailPage() {
       {user?.role === 'ADMIN' && listing.status && (
         <AdminPanel status={listing.status} internalNotes={listing.internalNotes} />
       )}
+
+      <SimilarListings currentId={id} />
     </div>
   );
 }
