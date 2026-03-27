@@ -1,0 +1,16 @@
+version: '3.8'
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: realestate_db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: realestate_user
+      POSTGRES_PASSWORD: realestate_pass
+      POSTGRES_DB: realestate_dev
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+volumes:
+  pgdata:
