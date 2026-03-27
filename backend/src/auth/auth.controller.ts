@@ -46,7 +46,7 @@ export class AuthController {
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 
-    return { message: 'ok', username: result.username, isAdmin: result.isAdmin };
+    return { message: 'ok', username: result.username, role: result.role };
   }
 
   @Post('refresh')
@@ -93,6 +93,6 @@ export class AuthController {
   @ApiResponse({ status: 200, description: 'Returns user info' })
   @ApiResponse({ status: 401, description: 'Not authenticated' })
   getMe(@CurrentUser() user: any) {
-    return { userId: user.userId, username: user.username, isAdmin: user.isAdmin };
+    return { userId: user.userId, username: user.username, role: user.role };
   }
 }

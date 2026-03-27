@@ -1,16 +1,32 @@
-import { Controller, Get, Query, Param, UseGuards } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiQuery, ApiResponse, ApiParam, ApiCookieAuth } from '@nestjs/swagger';
+import { Controller, Get, Post, Body, Query, Param, UseGuards, ForbiddenException } from '@nestjs/common';
+import { ApiTags, ApiOperation, ApiQuery, ApiResponse, ApiParam, ApiCookieAuth, ApiBody } from '@nestjs/swagger';
 import { ListingsService } from './listings.service';
 import { SearchListingsDto } from './dto/search-listings.dto';
+import { CreateListingDto } from './dto/create-listing.dto';
 import { ListingResponseDto } from './dto/listing-response.dto';
 import { OptionalJwtGuard } from '../auth/guards/optional-jwt.guard';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
-import { PropertyType } from '@prisma/client';
+import { PropertyType, UserRole } from '@prisma/client';
 
 @ApiTags('Listings')
 @Controller('listings')
 export class ListingsController {
   constructor(private readonly listingsService: ListingsService) {}
+
+  @Post()
+  @UseGuards(JwtAuthGuard)
+  @ApiOperation({ summary: 'Create a new listing (admin or agent only)' })
+  @ApiCookieAuth('access_token')
+  @ApiBody({ type: CreateListingDto })
+  @ApiResponse({ status: 201, description: 'Listing created' })
+  @ApiResponse({ status: 403, description: 'Insufficient permissions' })
+  async create(@Body() dto: CreateListingDto, @CurrentUser() user: any) {
+    if (user?.role !== UserRole.ADMIN && user?.role !== UserRole.AGENT) {
+      throw new ForbiddenException('Insufficient permissions');
+    }
+    return this.listingsService.create(dto);
+  }
 
   @Get()
   @UseGuards(OptionalJwtGuard)
@@ -27,8 +43,33 @@ export class ListingsController {
   @ApiResponse({ status: 200, description: 'Paginated listing results' })
   @ApiCookieAuth('access_token')
   async findAll(@Query() dto: SearchListingsDto, @CurrentUser() user: any) {
-    const isAdmin = user?.isAdmin ?? false;
-    return this.listingsService.findAll(dto, isAdmin);
+    return this.listingsService.findAll(dto, user?.role === UserRole.ADMIN, user?.userId);
+  }
+
+  @Get('suburbs')
+  @ApiOperation({ summary: 'Get distinct list of suburbs that have listings' })
+  @ApiResponse({ status: 200 })
+  async getSuburbs() {
+    return this.listingsService.getSuburbs();
+  }
+
+  @Get('saved')
+  @UseGuards(JwtAuthGuard)
+  @ApiOperation({ summary: 'Get all listings saved by the current user' })
+  @ApiCookieAuth('access_token')
+  @ApiResponse({ status: 200, description: 'List of saved listings' })
+  async getSaved(@CurrentUser() user: any) {
+    return this.listingsService.getSaved(user.userId);
+  }
+
+  @Post(':id/save')
+  @UseGuards(JwtAuthGuard)
+  @ApiOperation({ summary: 'Toggle save/unsave a listing' })
+  @ApiParam({ name: 'id', type: String })
+  @ApiCookieAuth('access_token')
+  @ApiResponse({ status: 200, description: 'Returns isSaved boolean' })
+  async toggleSave(@Param('id') id: string, @CurrentUser() user: any) {
+    return this.listingsService.toggleSave(user.userId, id);
   }
 
   @Get(':id')
@@ -39,7 +80,6 @@ export class ListingsController {
   @ApiResponse({ status: 404, description: 'Not found' })
   @ApiCookieAuth('access_token')
   async findOne(@Param('id') id: string, @CurrentUser() user: any) {
-    const isAdmin = user?.isAdmin ?? false;
-    return this.listingsService.findOne(id, isAdmin);
+    return this.listingsService.findOne(id, user?.role === UserRole.ADMIN, user?.userId);
   }
 }

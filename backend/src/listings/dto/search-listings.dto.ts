@@ -9,6 +9,11 @@ export class SearchListingsDto {
   @IsOptional()
   suburb?: string;
 
+  @ApiPropertyOptional({ example: 'Kathmandu,Lalitpur' })
+  @IsString()
+  @IsOptional()
+  suburbs?: string;
+
   @ApiPropertyOptional({ example: 10000000 })
   @Type(() => Number)
   @IsOptional()

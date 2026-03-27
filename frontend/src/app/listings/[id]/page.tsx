@@ -7,6 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { AdminPanel } from '@/components/AdminPanel';
+import { EnquiryForm } from '@/components/EnquiryForm';
 import { useListing } from '@/hooks/useListing';
 import { useAuth } from '@/hooks/useAuth';
 
@@ -84,22 +85,28 @@ export default function ListingDetailPage() {
       </Card>
 
       {listing.agent && (
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-base">Listed by</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-1">
-            <p className="font-semibold">{listing.agent.name}</p>
-            <p className="text-muted-foreground text-sm">{listing.agent.agencyName}</p>
-            {listing.agent.phone && (
-              <p className="text-sm">📞 {listing.agent.phone}</p>
-            )}
-            <p className="text-sm text-muted-foreground">✉️ {listing.agent.email}</p>
-          </CardContent>
-        </Card>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-base">Listed by</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-1">
+              <Link href={`/agents/${listing.agent.id}`} className="font-semibold hover:text-primary transition-colors">
+                {listing.agent.name}
+              </Link>
+              <p className="text-muted-foreground text-sm">{listing.agent.agencyName}</p>
+              {listing.agent.phone && (
+                <p className="text-sm">📞 {listing.agent.phone}</p>
+              )}
+              <p className="text-sm text-muted-foreground">✉️ {listing.agent.email}</p>
+            </CardContent>
+          </Card>
+          
+          <EnquiryForm agentId={listing.agent.id} listingId={listing.id} />
+        </div>
       )}
 
-      {user?.isAdmin && listing.status && (
+      {user?.role === 'ADMIN' && listing.status && (
         <AdminPanel status={listing.status} internalNotes={listing.internalNotes} />
       )}
     </div>

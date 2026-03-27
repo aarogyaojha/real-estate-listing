@@ -11,7 +11,27 @@ export class AgentsService {
   ) {}
 
   async findAll() {
-    return this.prisma.agent.findMany();
+    const agents = await this.prisma.agent.findMany();
+    
+    // Enrich with ratings
+    return Promise.all(agents.map(async (agent) => {
+      const stats = await this.prisma.agentReview.aggregate({
+        where: { agentId: agent.id },
+        _avg: { rating: true },
+        _count: true,
+      });
+
+      const listingCount = await this.prisma.listing.count({
+        where: { agentId: agent.id, status: 'ACTIVE' },
+      });
+
+      return {
+        ...agent,
+        avgRating: stats._avg.rating || 0,
+        reviewCount: stats._count || 0,
+        activeListingCount: listingCount,
+      };
+    }));
   }
 
   async findOne(id: string, query: SearchListingsDto) {
@@ -46,8 +66,18 @@ export class AgentsService {
 
     const sanitizedListings = items.map(l => this.listingsService.sanitize(l, false));
 
+    const ratings = await this.prisma.agentReview.aggregate({
+      where: { agentId: id },
+      _avg: { rating: true },
+      _count: true,
+    });
+
     return {
-      agent,
+      agent: {
+        ...agent,
+        avgRating: ratings._avg.rating || 0,
+        reviewCount: ratings._count || 0,
+      },
       listings: {
         data: sanitizedListings,
         meta: {
@@ -58,5 +88,38 @@ export class AgentsService {
         }
       }
     };
+  }
+
+  async getAdminStats() {
+    const agents = await this.prisma.agent.findMany();
+    
+    return Promise.all(agents.map(async (agent) => {
+      const stats = await this.prisma.listing.groupBy({
+        by: ['status'],
+        where: { agentId: agent.id },
+        _count: true,
+        _avg: { price: true },
+      });
+
+      const totalListings = await this.prisma.listing.count({ where: { agentId: agent.id } });
+
+      return {
+        agentId: agent.id,
+        agentName: agent.name,
+        totalListings,
+        stats: stats.map(s => ({
+          status: s.status,
+          count: s._count,
+          avgPrice: s._avg.price || 0,
+        })),
+      };
+    }));
+  }
+
+  async update(id: string, data: any) {
+    return this.prisma.agent.update({
+      where: { id },
+      data,
+    });
   }
 }

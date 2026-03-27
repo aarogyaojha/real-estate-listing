@@ -90,8 +90,8 @@ npm install
 npx prisma migrate dev --name init
 npx prisma db seed
 npm run start:dev
-# API at http://localhost:4000
-# Swagger at http://localhost:4000/api-docs
+# API at http://localhost:3000
+# Swagger at http://localhost:3000/api-docs
 ```
 
 ### 4. Set up the frontend
@@ -100,7 +100,7 @@ cd ../frontend
 cp .env.example .env.local
 npm install
 npm run dev
-# App at http://localhost:3000
+# App at http://localhost:3001
 ```
 
 ## Seeded credentials
@@ -114,23 +114,23 @@ Admin users see two extra fields: `status` and `internalNotes`.
 
 ## API reference
 
-Full interactive docs: **http://localhost:4000/api-docs**
+Full interactive docs: **http://localhost:3000/api-docs**
 
 ```bash
 # Login — sets httpOnly cookies
-curl -c cookies.txt -X POST http://localhost:4000/api/auth/login \
+curl -c cookies.txt -X POST http://localhost:3000/api/auth/login \
   -H "Content-Type: application/json" \
   -d '{"username":"aarogyaojha","password":"Admin@123"}'
 
 # Search listings
 curl -b cookies.txt \
-  "http://localhost:4000/api/listings?suburb=Kathmandu&price_min=10000000&bedrooms=3"
+  "http://localhost:3000/api/listings?suburb=Kathmandu&price_min=10000000&bedrooms=3"
 
 # Refresh tokens
-curl -c cookies.txt -b cookies.txt -X POST http://localhost:4000/api/auth/refresh
+curl -c cookies.txt -b cookies.txt -X POST http://localhost:3000/api/auth/refresh
 
 # Logout
-curl -b cookies.txt -X POST http://localhost:4000/api/auth/logout
+curl -b cookies.txt -X POST http://localhost:3000/api/auth/logout
 ```
 
 ## Running tests
@@ -152,3 +152,4 @@ See [CONTRIBUTING.md](./CONTRIBUTING.md).
 ## License
 
 [MIT](./LICENSE) © 2025 aarogyaojha
+

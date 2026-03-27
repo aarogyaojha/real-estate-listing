@@ -1,13 +1,46 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { SearchListingsDto } from './dto/search-listings.dto';
-import { Listing, Prisma } from '@prisma/client';
+import { CreateListingDto } from './dto/create-listing.dto';
+import { Listing, Prisma, UserRole } from '@prisma/client';
 
 @Injectable()
 export class ListingsService {
   constructor(private prisma: PrismaService) {}
 
-  async findAll(dto: SearchListingsDto, isAdmin: boolean) {
+  async create(dto: CreateListingDto) {
+    return this.prisma.listing.create({
+      data: {
+        title: dto.title,
+        description: dto.description,
+        price: dto.price,
+        suburb: dto.suburb,
+        state: dto.state,
+        postcode: dto.postcode,
+        propertyType: dto.propertyType,
+        bedrooms: dto.bedrooms,
+        bathrooms: dto.bathrooms,
+        parkingSpaces: dto.parkingSpaces ?? 0,
+        landSizeSqm: dto.landSizeSqm,
+        floorSizeSqm: dto.floorSizeSqm,
+        internalNotes: dto.internalNotes,
+        agentId: dto.agentId,
+      },
+      include: { agent: true },
+    });
+  }
+
+  async getSuburbs(): Promise<string[]> {
+    const results = await this.prisma.listing.findMany({
+      select: { suburb: true },
+      distinct: ['suburb'],
+      orderBy: { suburb: 'asc' },
+    });
+    return results.map(r => r.suburb);
+  }
+
+  async findAll(dto: SearchListingsDto, isAdmin: boolean, userId?: string) {
+    console.log(`[ListingsService] findAll for user: ${userId || 'GUEST'}`);
     const { page = 1, limit = 12 } = dto;
     const skip = (page - 1) * limit;
     const where = this.buildWhereClause(dto);
@@ -23,8 +56,18 @@ export class ListingsService {
       this.prisma.listing.count({ where }),
     ]);
 
+    let savedIds = new Set<string>();
+    if (userId) {
+      const saved = await this.prisma.savedListing.findMany({
+        where: { userId },
+        select: { listingId: true },
+      });
+      savedIds = new Set(saved.map(s => s.listingId));
+      console.log(`[ListingsService] found ${savedIds.size} saved listings for user ${userId}:`, Array.from(savedIds));
+    }
+
     return {
-      data: items.map(item => this.sanitize(item, isAdmin)),
+      data: items.map(item => ({ ...this.sanitize(item, isAdmin), isSaved: savedIds.has(item.id) })),
       meta: {
         total,
         page,
@@ -34,7 +77,7 @@ export class ListingsService {
     };
   }
 
-  async findOne(id: string, isAdmin: boolean) {
+  async findOne(id: string, isAdmin: boolean, userId?: string) {
     const listing = await this.prisma.listing.findUnique({
       where: { id },
       include: { agent: true },
@@ -44,35 +87,91 @@ export class ListingsService {
       throw new NotFoundException('Listing not found');
     }
 
-    return this.sanitize(listing, isAdmin);
+    let isSaved = false;
+    if (userId) {
+      const saved = await this.prisma.savedListing.findUnique({
+        where: { userId_listingId: { userId, listingId: id } },
+      });
+      isSaved = !!saved;
+    }
+
+    return { ...this.sanitize(listing, isAdmin), isSaved };
+  }
+
+  async toggleSave(userId: string, listingId: string) {
+    const listing = await this.prisma.listing.findUnique({ where: { id: listingId } });
+    if (!listing) throw new NotFoundException('Listing not found');
+
+    const existing = await this.prisma.savedListing.findUnique({
+      where: { userId_listingId: { userId, listingId } },
+    });
+
+    if (existing) {
+      await this.prisma.savedListing.delete({ where: { userId_listingId: { userId, listingId } } });
+      return { isSaved: false };
+    } else {
+      await this.prisma.savedListing.create({ data: { userId, listingId } });
+      return { isSaved: true };
+    }
+  }
+
+  async getSaved(userId: string) {
+    const saved = await this.prisma.savedListing.findMany({
+      where: { userId },
+      include: { listing: { include: { agent: true } } },
+      orderBy: { createdAt: 'desc' },
+    });
+    return saved.map(s => ({ ...s.listing, isSaved: true }));
   }
 
   buildWhereClause(dto: SearchListingsDto): Prisma.ListingWhereInput {
     const where: Prisma.ListingWhereInput = {};
-    if (dto.suburb) where.suburb = { equals: dto.suburb, mode: 'insensitive' };
     
+    if (dto.suburbs) {
+      const suburbList = dto.suburbs.split(',').filter(Boolean);
+      if (suburbList.length > 0) {
+        where.suburb = { in: suburbList, mode: 'insensitive' };
+      }
+    } else if (dto.suburb) {
+      where.suburb = { equals: dto.suburb, mode: 'insensitive' };
+    }
+
     if (dto.price_min !== undefined || dto.price_max !== undefined) {
       where.price = {};
       if (dto.price_min !== undefined) where.price.gte = dto.price_min;
       if (dto.price_max !== undefined) where.price.lte = dto.price_max;
     }
 
-    if (dto.bedrooms !== undefined) where.bedrooms = dto.bedrooms;
-    if (dto.bathrooms !== undefined) where.bathrooms = dto.bathrooms;
-    if (dto.property_type) where.propertyType = dto.property_type;
+    if (dto.bedrooms !== undefined) {
+      if (dto.bedrooms >= 4) {
+        where.bedrooms = { gte: 4 };
+      } else {
+        where.bedrooms = dto.bedrooms;
+      }
+    }
     
+    if (dto.bathrooms !== undefined) {
+      if (dto.bathrooms >= 4) {
+        where.bathrooms = { gte: 4 };
+      } else {
+        where.bathrooms = dto.bathrooms;
+      }
+    }
+
+    if (dto.property_type) where.propertyType = dto.property_type;
+
     if (dto.keyword) {
       where.OR = [
         { title: { contains: dto.keyword, mode: 'insensitive' } },
         { description: { contains: dto.keyword, mode: 'insensitive' } },
       ];
     }
-    
+
     return where;
   }
 
   sanitize<T extends Listing>(listing: T, isAdmin: boolean): Partial<T> {
-    const { status, internalNotes, ...publicFields } = listing;
+    const { internalNotes, ...publicFields } = listing;
     if (isAdmin) {
       return listing;
     }

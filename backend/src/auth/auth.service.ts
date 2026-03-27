@@ -4,6 +4,7 @@ import * as bcrypt from 'bcrypt';
 import { PrismaService } from '../prisma/prisma.service';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
+import { UserRole } from '@prisma/client';
 
 @Injectable()
 export class AuthService {
@@ -34,7 +35,7 @@ export class AuthService {
     const isMatch = await bcrypt.compare(dto.password, user.passwordHash);
     if (!isMatch) throw new UnauthorizedException('Invalid credentials');
 
-    return this.issueTokens(user.id, user.username, user.isAdmin);
+    return this.issueTokens(user.id, user.username, user.role);
   }
 
   async refreshTokens(userId: string, refreshToken: string) {
@@ -52,15 +53,15 @@ export class AuthService {
     const user = await this.prisma.user.findUnique({ where: { id: userId } });
     if (!user) throw new UnauthorizedException();
 
-    return this.issueTokens(user.id, user.username, user.isAdmin);
+    return this.issueTokens(user.id, user.username, user.role);
   }
 
   async logout(userId: string) {
     await this.prisma.refreshToken.deleteMany({ where: { userId } });
   }
 
-  private async issueTokens(userId: string, username: string, isAdmin: boolean) {
-    const payload = { sub: userId, username, isAdmin };
+  private async issueTokens(userId: string, username: string, role: UserRole) {
+    const payload = { sub: userId, username, role };
 
     const accessToken = this.jwtService.sign(payload, {
       secret: process.env.JWT_ACCESS_SECRET || 'change_me_access_secret_min_32_chars',
@@ -80,6 +81,6 @@ export class AuthService {
       },
     });
 
-    return { accessToken, refreshToken, username, isAdmin };
+    return { accessToken, refreshToken, username, role };
   }
 }

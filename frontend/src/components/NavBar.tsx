@@ -25,13 +25,41 @@ export function NavBar() {
           <Link href="/listings">
             <Button variant="ghost" size="sm">Listings</Button>
           </Link>
+          <Link href="/agents">
+            <Button variant="ghost" size="sm">Agents</Button>
+          </Link>
           {user ? (
             <>
+              {(user.role === 'ADMIN' || user.role === 'AGENT') && (
+                <Link href="/listings/new">
+                  <Button size="sm" variant="default">+ Add Listing</Button>
+                </Link>
+              )}
+              {user.role === 'ADMIN' && (
+                <Link href="/admin">
+                  <Button variant="ghost" size="sm">Admin</Button>
+                </Link>
+              )}
+              {user.role === 'AGENT' && (
+                <>
+                  <Link href="/agent">
+                    <Button variant="ghost" size="sm">Dashboard</Button>
+                  </Link>
+                  <Link href="/agent/settings">
+                    <Button variant="ghost" size="sm">Profile</Button>
+                  </Link>
+                </>
+              )}
+              {user.role === 'CUSTOMER' && (
+                <Link href="/saved">
+                  <Button variant="ghost" size="sm">❤️ Saved</Button>
+                </Link>
+              )}
               <span className="text-sm text-muted-foreground">
                 {user.username}
-                {user.isAdmin && (
-                  <Badge variant="secondary" className="ml-2">Admin</Badge>
-                )}
+                <Badge variant="secondary" className="ml-2 uppercase text-[10px] tracking-wide">
+                  {user.role}
+                </Badge>
               </span>
               <Button variant="outline" size="sm" onClick={handleLogout}>
                 Logout

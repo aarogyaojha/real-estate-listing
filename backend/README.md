@@ -26,10 +26,10 @@ cp .env.example .env
 npm install
 npx prisma migrate dev --name init
 npx prisma db seed
-npm run start:dev   # http://localhost:4000
+npm run start:dev   # http://localhost:3000
 ```
 
-Swagger UI: http://localhost:4000/api-docs
+Swagger UI: http://localhost:3000/api-docs
 
 ## Environment variables
 
@@ -40,7 +40,7 @@ Swagger UI: http://localhost:4000/api-docs
 | JWT_REFRESH_SECRET    | Secret for refresh tokens            |
 | ACCESS_TOKEN_EXPIRY   | Access token TTL (default: 15m)      |
 | REFRESH_TOKEN_EXPIRY  | Refresh token TTL (default: 7d)      |
-| PORT                  | API port (default: 4000)             |
+| PORT                  | API port (default: 3000)             |
 
 ## API endpoints
 
@@ -63,3 +63,4 @@ npm run test        # unit tests
 npm run test:e2e    # integration tests
 npm run test:cov    # coverage report
 ```
+

@@ -19,14 +19,14 @@ Search interface for the real-estate-listing platform.
 cd frontend
 cp .env.example .env.local
 npm install
-npm run dev   # http://localhost:3000
+npm run dev   # http://localhost:3001
 ```
 
 ## Environment variables
 
 | Variable              | Description              | Default                      |
 |-----------------------|--------------------------|------------------------------|
-| NEXT_PUBLIC_API_URL   | NestJS API base URL      | http://localhost:4000/api    |
+| NEXT_PUBLIC_API_URL   | NestJS API base URL      | http://localhost:3000/api    |
 
 ## Pages
 
@@ -40,3 +40,4 @@ npm run dev   # http://localhost:3000
 ```bash
 npm run test        # Jest + React Testing Library
 ```
+

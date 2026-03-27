@@ -1,6 +1,6 @@
 'use client';
 
-import { Suspense, useCallback, useEffect } from 'react';
+import { Suspense, useCallback, useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
@@ -8,11 +8,12 @@ import { FilterPanel } from '@/components/FilterPanel';
 import { ListingCard } from '@/components/ListingCard';
 import { Pagination } from '@/components/Pagination';
 import { useListings } from '@/hooks/useListings';
-import { ListingFilters } from '@/lib/api';
+import { ListingFilters, fetchSuburbs } from '@/lib/api';
 
 function parseFilters(params: URLSearchParams): ListingFilters {
   const f: ListingFilters = {};
   if (params.get('suburb')) f.suburb = params.get('suburb')!;
+  if (params.get('suburbs')) f.suburbs = params.get('suburbs')!;
   if (params.get('keyword')) f.keyword = params.get('keyword')!;
   if (params.get('price_min')) f.price_min = Number(params.get('price_min'));
   if (params.get('price_max')) f.price_max = Number(params.get('price_max'));
@@ -29,6 +30,13 @@ function ListingsContent() {
   const searchParams = useSearchParams();
   const filters = parseFilters(searchParams);
   const { data, isLoading, isError } = useListings(filters);
+  const [suburbs, setSuburbs] = useState<string[]>([]);
+
+  useEffect(() => {
+    fetchSuburbs()
+      .then(res => setSuburbs(Array.isArray(res) ? res : (res as any)?.data ?? []))
+      .catch(() => setSuburbs([]));
+  }, []);
 
   const updateUrl = useCallback((newFilters: Partial<ListingFilters>) => {
     const merged = { ...filters, ...newFilters, page: 1 };
@@ -52,7 +60,7 @@ function ListingsContent() {
   return (
     <div className="flex gap-6">
       <aside className="hidden lg:block w-72 shrink-0">
-        <FilterPanel filters={filters} onFilterChange={updateUrl} />
+        <FilterPanel filters={filters} onFilterChange={updateUrl} suburbs={suburbs} />
       </aside>
 
       <div className="flex-1 min-w-0">

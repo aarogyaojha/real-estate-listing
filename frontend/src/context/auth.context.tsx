@@ -6,7 +6,7 @@ import { getMe, logout as apiLogout } from '@/lib/api';
 interface User {
   userId: string;
   username: string;
-  isAdmin: boolean;
+  role: 'ADMIN' | 'AGENT' | 'CUSTOMER';
 }
 
 interface AuthContextType {

@@ -13,7 +13,7 @@ This document describes the system design, module layout, data flow, and key tec
                      │ HTTP + httpOnly cookies
                      ▼
 ┌─────────────────────────────────────────────────────────┐
-│               NestJS API  :4000                         │
+│               NestJS API  :3000                         │
 │                                                         │
 │  ┌──────────┐  ┌────────────┐  ┌────────────────────┐  │
 │  │  Auth    │  │  Listings  │  │     Agents         │  │
@@ -92,3 +92,4 @@ AppModule
 5. **OptionalJwtGuard pattern** — A single route uses `OptionalJwtGuard` which attaches `req.user` when a valid token is present but never rejects unauthenticated callers.
 
 6. **Index strategy** — Indexes on `price` (range queries), `suburb` (equality + ILIKE), `propertyType`, `bedrooms`, `bathrooms` (common filter combinations), and `agentId` (JOIN lookups).
+

@@ -20,4 +20,6 @@ export class ListingResponseDto {
   status?: ListingStatus;
   @ApiPropertyOptional({ description: 'Admin only' })
   internalNotes?: string;
+  @ApiProperty()
+  isSaved: boolean;
 }
