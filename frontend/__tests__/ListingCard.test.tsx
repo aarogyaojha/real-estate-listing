@@ -1,6 +1,6 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
-import { ListingCard } from '../components/ListingCard';
+import { ListingCard } from '../src/components/ListingCard';
 
 const mockListing = {
   id: 'test-uuid',
@@ -14,7 +14,6 @@ const mockListing = {
   parkingSpaces: 1,
 };
 
-// Mock next/link
 jest.mock('next/link', () => {
   return ({ children, href }: any) => <a href={href}>{children}</a>;
 });

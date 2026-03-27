@@ -51,12 +51,10 @@ function ListingsContent() {
 
   return (
     <div className="flex gap-6">
-      {/* Sidebar */}
       <aside className="hidden lg:block w-72 shrink-0">
         <FilterPanel filters={filters} onFilterChange={updateUrl} />
       </aside>
 
-      {/* Main content */}
       <div className="flex-1 min-w-0">
         <div className="flex items-center justify-between mb-5">
           <h1 className="text-2xl font-bold">

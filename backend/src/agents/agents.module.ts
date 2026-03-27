@@ -5,6 +5,6 @@ import { ListingsService } from '../listings/listings.service';
 
 @Module({
   controllers: [AgentsController],
-  providers: [AgentsService, ListingsService], // Providing ListingsService here for sharing sanitation/where building
+  providers: [AgentsService, ListingsService],
 })
 export class AgentsModule {}

@@ -47,7 +47,6 @@ export class AuthService {
     }
     if (validToken.userId !== userId) throw new UnauthorizedException();
 
-    // Revoke old
     await this.prisma.refreshToken.delete({ where: { id: validToken.id } });
 
     const user = await this.prisma.user.findUnique({ where: { id: userId } });
@@ -73,7 +72,6 @@ export class AuthService {
       expiresIn: '7d',
     });
 
-    // Save refresh token to DB
     await this.prisma.refreshToken.create({
       data: {
         token: refreshToken,

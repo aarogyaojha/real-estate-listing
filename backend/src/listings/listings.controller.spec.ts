@@ -1,6 +1,5 @@
 import { NotFoundException } from '@nestjs/common';
 
-// Inline mock to avoid Prisma ESM import issues
 const createMockListingsService = () => ({
   findAll: jest.fn(),
   findOne: jest.fn(),

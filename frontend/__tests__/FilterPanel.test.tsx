@@ -1,6 +1,6 @@
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
-import { FilterPanel } from '../components/FilterPanel';
+import { FilterPanel } from '../src/components/FilterPanel';
 
 const mockOnFilterChange = jest.fn();
 

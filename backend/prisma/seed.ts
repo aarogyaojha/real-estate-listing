@@ -4,11 +4,9 @@ import * as bcrypt from 'bcrypt';
 const prisma = new PrismaClient();
 
 async function main() {
-  // Hash passwords
   const adminPassword = await bcrypt.hash('Admin@123', 12);
   const userPassword = await bcrypt.hash('User@123', 12);
 
-  // Users
   const admin = await prisma.user.upsert({
     where: { username: 'aarogyaojha' },
     update: {},
@@ -29,7 +27,6 @@ async function main() {
     },
   });
 
-  // Agents
   const agents = await Promise.all([
     prisma.agent.upsert({ where: { email: 'agent1@example.com' }, update: {}, create: { name: 'Alice Smith', email: 'agent1@example.com', phone: '0412345678', agencyName: 'Luxury Real Estate' } }),
     prisma.agent.upsert({ where: { email: 'agent2@example.com' }, update: {}, create: { name: 'Bob Jones', email: 'agent2@example.com', phone: '0423456789', agencyName: 'City Homes' } }),
@@ -38,7 +35,6 @@ async function main() {
     prisma.agent.upsert({ where: { email: 'agent5@example.com' }, update: {}, create: { name: 'Evan Williams', email: 'agent5@example.com', phone: '0456789012', agencyName: 'Elite Realty' } }),
   ]);
 
-  // Listings
   const suburbs = ['Kathmandu', 'Patan', 'Bhaktapur', 'Lalitpur', 'Pokhara'];
   const propertyTypes = ['HOUSE', 'APARTMENT', 'TOWNHOUSE', 'LAND', 'COMMERCIAL'] as const;
   const statuses = ['ACTIVE', 'UNDER_CONTRACT', 'SOLD', 'WITHDRAWN'] as const;
@@ -48,7 +44,7 @@ async function main() {
     const randomSuburb = suburbs[Math.floor(Math.random() * suburbs.length)];
     const randomType = propertyTypes[Math.floor(Math.random() * propertyTypes.length)];
     const randomStatus = statuses[Math.floor(Math.random() * statuses.length)];
-    const price = Math.floor(Math.random() * 45000000) + 5000000; // 5M to 50M
+    const price = Math.floor(Math.random() * 45000000) + 5000000;
     const bedrooms = Math.floor(Math.random() * 5) + 1;
     const bathrooms = Math.floor(Math.random() * 3) + 1;
     

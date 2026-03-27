@@ -10,6 +10,14 @@ Next.js frontend using shadcn/ui.
 [![Next.js](https://img.shields.io/badge/Next.js-14-black)](https://nextjs.org)
 [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-15-blue)](https://postgresql.org)
 
+## Assessment Requirements Fulfilled
+
+- **Backend API & Frontend GUI**: Fully implements the `/listings` search with keyword and property filters, plus the `/listings/:id` detail endpoint. The Next.js frontend provides a clean, responsive search experience with URL synchronization.
+- **Relational DB & Indexing**: Uses PostgreSQL (via Prisma) with dedicated tables for properties and agents. Composite criteria (price, suburb, propertyType, beds, baths, status) are explicitly indexed to support high-performance lookup patterns.
+- **Role-aware Behavior**: Implements an `isAdmin` flag securely transmitted via `httpOnly` JWT cookies. The service layer aggressively sanitizes outgoing data, ensuring only authenticated admins receive the sensitive `status` and `internalNotes` fields.
+- **Pagination**: Offset-based pagination is implemented natively in the API and wired to the frontend's page controls.
+- **Clean Architecture & Testing**: Built with strict separation of concerns (Controllers handle HTTP, Services handle DB logic). The repo includes strong Unit and E2E testing for the backend, paired with UI component testing for the frontend.
+
 ## Tech stack
 
 | Layer      | Technology                                          |
