@@ -87,7 +87,7 @@ export function FilterPanel({ filters, onFilterChange }: FilterPanelProps) {
         <Label>Property Type</Label>
         <Select
           value={filters.property_type || 'ALL'}
-          onValueChange={v => onFilterChange({ property_type: v === 'ALL' ? undefined : v })}
+          onValueChange={v => onFilterChange({ property_type: (v === 'ALL' || v === null) ? undefined : v })}
         >
           <SelectTrigger>
             <SelectValue placeholder="Any type" />
@@ -106,7 +106,7 @@ export function FilterPanel({ filters, onFilterChange }: FilterPanelProps) {
           <Label>Bedrooms</Label>
           <Select
             value={filters.bedrooms ? String(filters.bedrooms) : 'ANY'}
-            onValueChange={v => onFilterChange({ bedrooms: v === 'ANY' ? undefined : Number(v) })}
+            onValueChange={v => onFilterChange({ bedrooms: (v === 'ANY' || v === null) ? undefined : Number(v) })}
           >
             <SelectTrigger>
               <SelectValue placeholder="Any" />
@@ -123,7 +123,7 @@ export function FilterPanel({ filters, onFilterChange }: FilterPanelProps) {
           <Label>Bathrooms</Label>
           <Select
             value={filters.bathrooms ? String(filters.bathrooms) : 'ANY'}
-            onValueChange={v => onFilterChange({ bathrooms: v === 'ANY' ? undefined : Number(v) })}
+            onValueChange={v => onFilterChange({ bathrooms: (v === 'ANY' || v === null) ? undefined : Number(v) })}
           >
             <SelectTrigger>
               <SelectValue placeholder="Any" />

@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect } from 'react';
+import { Suspense, useCallback, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
@@ -24,7 +24,7 @@ function parseFilters(params: URLSearchParams): ListingFilters {
   return f;
 }
 
-export default function ListingsPage() {
+function ListingsContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const filters = parseFilters(searchParams);
@@ -70,9 +70,9 @@ export default function ListingsPage() {
               <div key={i} className="rounded-xl border overflow-hidden">
                 <Skeleton className="h-36 w-full" />
                 <div className="p-4 space-y-2">
-                  <Skeleton className="h-4 w-3/4" />
-                  <Skeleton className="h-6 w-1/2" />
-                  <Skeleton className="h-3 w-1/3" />
+                   <Skeleton className="h-4 w-3/4" />
+                   <Skeleton className="h-6 w-1/2" />
+                   <Skeleton className="h-3 w-1/3" />
                 </div>
               </div>
             ))}
@@ -101,5 +101,27 @@ export default function ListingsPage() {
         )}
       </div>
     </div>
+  );
+}
+
+export default function ListingsPage() {
+  return (
+    <Suspense fallback={
+      <div className="flex gap-6">
+        <aside className="hidden lg:block w-72 shrink-0">
+          <div className="h-96 rounded-xl border bg-card animate-pulse" />
+        </aside>
+        <div className="flex-1 min-w-0">
+          <div className="h-8 w-48 bg-muted animate-pulse mb-5 rounded" />
+          <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
+            {Array.from({ length: 6 }).map((_, i) => (
+              <div key={i} className="h-64 rounded-xl border bg-card animate-pulse" />
+            ))}
+          </div>
+        </div>
+      </div>
+    }>
+      <ListingsContent />
+    </Suspense>
   );
 }
