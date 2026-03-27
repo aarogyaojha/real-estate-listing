@@ -9,6 +9,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { AdminPanel } from '@/components/AdminPanel';
 import { EnquiryForm } from '@/components/EnquiryForm';
 import { MortgageCalculator } from '@/components/MortgageCalculator';
+import { PriceHistoryTimeline } from '@/components/PriceHistoryTimeline';
 import { SimilarListings } from '@/components/SimilarListings';
 import { useListing } from '@/hooks/useListing';
 import { useAuth } from '@/hooks/useAuth';
@@ -108,10 +109,17 @@ export default function ListingDetailPage() {
         </div>
       )}
 
-      <MortgageCalculator price={listing.price} />
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="lg:col-span-2">
+          <MortgageCalculator price={listing.price} />
+        </div>
+        <div className="lg:col-span-1">
+          <PriceHistoryTimeline id={listing.id} currentPrice={listing.price} />
+        </div>
+      </div>
 
       {user?.role === 'ADMIN' && listing.status && (
-        <AdminPanel status={listing.status} internalNotes={listing.internalNotes} />
+        <AdminPanel listingId={listing.id} status={listing.status} internalNotes={listing.internalNotes} />
       )}
 
       <SimilarListings currentId={id} />

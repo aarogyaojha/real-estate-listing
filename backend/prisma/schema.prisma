@@ -4,8 +4,9 @@ datasource db {
 }
 
 generator client {
-  provider   = "prisma-client-js"
-  engineType = "binary"
+  provider      = "prisma-client-js"
+  engineType    = "library"
+  binaryTargets = ["native"]
 }
 
 enum UserRole {
@@ -23,6 +24,7 @@ model User {
   refreshTokens  RefreshToken[]
   savedListings  SavedListing[]
   reviews        AgentReview[]
+  savedSearches  SavedSearch[]
   createdAt      DateTime       @default(now())
   updatedAt      DateTime       @updatedAt
 }
@@ -74,6 +76,7 @@ model Listing {
   agent         Agent          @relation(fields: [agentId], references: [id])
   savedBy       SavedListing[]
   enquiries     Enquiry[]
+  priceHistory  ListingPriceHistory[]
   listedAt      DateTime       @default(now())
   createdAt     DateTime      @default(now())
   updatedAt     DateTime      @updatedAt
@@ -137,4 +140,25 @@ model AgentReview {
   createdAt DateTime @default(now())
 
   @@unique([agentId, userId])
+}
+
+model ListingPriceHistory {
+  id        String   @id @default(uuid())
+  listing   Listing  @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  listingId String
+  price     Decimal  @db.Decimal(12, 2)
+  changedAt DateTime @default(now())
+
+  @@index([listingId])
+}
+
+model SavedSearch {
+  id          String   @id @default(uuid())
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId      String
+  name        String
+  filtersJSON String
+  createdAt   DateTime @default(now())
+
+  @@index([userId])
 }

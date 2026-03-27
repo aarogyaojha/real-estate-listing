@@ -1,8 +1,9 @@
-import { Controller, Get, Post, Body, Query, Param, UseGuards, ForbiddenException, Delete, Patch } from '@nestjs/common';
+import { Controller, Get, Post, Body, Query, Param, UseGuards, ForbiddenException, Delete, Patch, Request } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiQuery, ApiResponse, ApiParam, ApiCookieAuth, ApiBody } from '@nestjs/swagger';
 import { ListingsService } from './listings.service';
 import { SearchListingsDto } from './dto/search-listings.dto';
 import { CreateListingDto } from './dto/create-listing.dto';
+import { CreateSavedSearchDto } from './dto/create-saved-search.dto';
 import { ListingResponseDto } from './dto/listing-response.dto';
 import { OptionalJwtGuard } from '../auth/guards/optional-jwt.guard';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
@@ -71,6 +72,22 @@ export class ListingsController {
     return this.listingsService.findSimilar(id);
   }
 
+  @Get(':id/price-history')
+  @ApiOperation({ summary: 'Get pricing history for a listing' })
+  @ApiResponse({ status: 200, description: 'Price history array' })
+  async getPriceHistory(@Param('id') id: string) {
+    return this.listingsService.getPriceHistory(id);
+  }
+
+  @Patch(':id/status')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN)
+  @ApiOperation({ summary: 'Update listing status (Admin only)' })
+  @ApiResponse({ status: 200, description: 'Status updated' })
+  async updateStatus(@Param('id') id: string, @Body('status') status: any) {
+    return this.listingsService.updateStatus(id, status);
+  }
+
   @Get('saved')
   @UseGuards(JwtAuthGuard)
   @ApiOperation({ summary: 'Get all listings saved by the current user' })
@@ -80,14 +97,32 @@ export class ListingsController {
     return this.listingsService.getSaved(user.userId);
   }
 
-  @Post(':id/save')
+  @Post('save')
   @UseGuards(JwtAuthGuard)
-  @ApiOperation({ summary: 'Toggle save/unsave a listing' })
-  @ApiParam({ name: 'id', type: String })
-  @ApiCookieAuth('access_token')
-  @ApiResponse({ status: 200, description: 'Returns isSaved boolean' })
-  async toggleSave(@Param('id') id: string, @CurrentUser() user: any) {
-    return this.listingsService.toggleSave(user.userId, id);
+  @ApiOperation({ summary: 'Toggle save listing for user' })
+  async toggleSave(@Request() req, @Body('listingId') listingId: string) {
+    return this.listingsService.toggleSave(req.user.id, listingId);
+  }
+
+  @Post('saved-searches')
+  @UseGuards(JwtAuthGuard)
+  @ApiOperation({ summary: 'Save a search' })
+  async createSavedSearch(@Request() req, @Body() dto: CreateSavedSearchDto) {
+    return this.listingsService.createSavedSearch(req.user.id, dto.name, dto.filtersJSON);
+  }
+
+  @Get('saved-searches')
+  @UseGuards(JwtAuthGuard)
+  @ApiOperation({ summary: 'Get saved searches' })
+  async getSavedSearches(@Request() req) {
+    return this.listingsService.getSavedSearches(req.user.id);
+  }
+
+  @Delete('saved-searches/:id')
+  @UseGuards(JwtAuthGuard)
+  @ApiOperation({ summary: 'Delete a saved search' })
+  async deleteSavedSearch(@Request() req, @Param('id') id: string) {
+    return this.listingsService.deleteSavedSearch(req.user.id, id);
   }
 
   @Get(':id')

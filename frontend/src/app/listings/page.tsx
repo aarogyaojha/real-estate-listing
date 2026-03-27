@@ -7,7 +7,10 @@ import { Button } from '@/components/ui/button';
 import { FilterPanel } from '@/components/FilterPanel';
 import { ListingCard } from '@/components/ListingCard';
 import { Pagination } from '@/components/Pagination';
+import { SavedSearchButton } from '@/components/SavedSearchButton';
+import { RecentlyViewed } from '@/components/RecentlyViewed';
 import { useListings } from '@/hooks/useListings';
+import { useAuth } from '@/hooks/useAuth';
 import { ListingFilters, fetchSuburbs } from '@/lib/api';
 
 function parseFilters(params: URLSearchParams): ListingFilters {
@@ -54,13 +57,15 @@ function ListingsContent() {
     router.push(`/listings?${params.toString()}`);
   }, [searchParams, router]);
 
+  const { user } = useAuth();
   const listings = data?.data || [];
   const meta = data?.meta || { total: 0, page: 1, limit: 12, totalPages: 0 };
 
   return (
     <div className="flex gap-6">
-      <aside className="hidden lg:block w-72 shrink-0">
+      <aside className="hidden lg:block w-72 shrink-0 space-y-6">
         <FilterPanel filters={filters} onFilterChange={updateUrl} suburbs={suburbs} />
+        <RecentlyViewed />
       </aside>
 
       <div className="flex-1 min-w-0">
@@ -68,6 +73,7 @@ function ListingsContent() {
           <h1 className="text-2xl font-bold">
             {isLoading ? 'Loading...' : `${meta.total} Properties Found`}
           </h1>
+          {user && !isLoading && meta.total > 0 && <SavedSearchButton filters={filters} />}
         </div>
 
         {isLoading ? (

@@ -128,6 +128,34 @@ export async function fetchSimilarListings(id: string) {
   return apiFetch<any[]>(`/listings/${id}/similar`);
 }
 
+export async function updateListingStatus(id: string, status: string) {
+  return apiFetch<any>(`/listings/${id}/status`, {
+    method: 'PATCH',
+    body: JSON.stringify({ status }),
+  });
+}
+
+export async function fetchPriceHistory(id: string) {
+  return apiFetch<any[]>(`/listings/${id}/price-history`);
+}
+
+export async function createSavedSearch(name: string, filtersJSON: string) {
+  return apiFetch<any>('/listings/saved-searches', {
+    method: 'POST',
+    body: JSON.stringify({ name, filtersJSON }),
+  });
+}
+
+export async function fetchSavedSearches() {
+  return apiFetch<any[]>('/listings/saved-searches');
+}
+
+export async function deleteSavedSearch(id: string) {
+  return apiFetch<any>(`/listings/saved-searches/${id}`, {
+    method: 'DELETE',
+  });
+}
+
 export async function login(body: { username: string; password: string }) {
   return apiFetch<any>('/auth/login', {
     method: 'POST',
