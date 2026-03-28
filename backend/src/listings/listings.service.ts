@@ -36,11 +36,10 @@ export class ListingsService {
       distinct: ['suburb'],
       orderBy: { suburb: 'asc' },
     });
-    return results.map(r => r.suburb);
+    return results.map((r) => r.suburb);
   }
 
   async findAll(dto: SearchListingsDto, isAdmin: boolean, userId?: string) {
-    console.log(`[ListingsService] findAll for user: ${userId || 'GUEST'}`);
     const { page = 1, limit = 12 } = dto;
     const skip = (page - 1) * limit;
     const where = this.buildWhereClause(dto);
@@ -62,12 +61,14 @@ export class ListingsService {
         where: { userId },
         select: { listingId: true },
       });
-      savedIds = new Set(saved.map(s => s.listingId));
-      console.log(`[ListingsService] found ${savedIds.size} saved listings for user ${userId}:`, Array.from(savedIds));
+      savedIds = new Set(saved.map((s) => s.listingId));
     }
 
     return {
-      data: items.map(item => ({ ...this.sanitize(item, isAdmin), isSaved: savedIds.has(item.id) })),
+      data: items.map((item) => ({
+        ...this.sanitize(item, isAdmin),
+        isSaved: savedIds.has(item.id),
+      })),
       meta: {
         total,
         page,
@@ -99,7 +100,9 @@ export class ListingsService {
   }
 
   async toggleSave(userId: string, listingId: string) {
-    const listing = await this.prisma.listing.findUnique({ where: { id: listingId } });
+    const listing = await this.prisma.listing.findUnique({
+      where: { id: listingId },
+    });
     if (!listing) throw new NotFoundException('Listing not found');
 
     const existing = await this.prisma.savedListing.findUnique({
@@ -107,7 +110,9 @@ export class ListingsService {
     });
 
     if (existing) {
-      await this.prisma.savedListing.delete({ where: { userId_listingId: { userId, listingId } } });
+      await this.prisma.savedListing.delete({
+        where: { userId_listingId: { userId, listingId } },
+      });
       return { isSaved: false };
     } else {
       await this.prisma.savedListing.create({ data: { userId, listingId } });
@@ -121,12 +126,12 @@ export class ListingsService {
       include: { listing: { include: { agent: true } } },
       orderBy: { createdAt: 'desc' },
     });
-    return saved.map(s => ({ ...s.listing, isSaved: true }));
+    return saved.map((s) => ({ ...s.listing, isSaved: true }));
   }
 
   buildWhereClause(dto: SearchListingsDto): Prisma.ListingWhereInput {
     const where: Prisma.ListingWhereInput = {};
-    
+
     if (dto.suburbs) {
       const suburbList = dto.suburbs.split(',').filter(Boolean);
       if (suburbList.length > 0) {
@@ -149,7 +154,7 @@ export class ListingsService {
         where.bedrooms = dto.bedrooms;
       }
     }
-    
+
     if (dto.bathrooms !== undefined) {
       if (dto.bathrooms >= 4) {
         where.bathrooms = { gte: 4 };
@@ -242,7 +247,7 @@ export class ListingsService {
     const listing = await this.prisma.listing.findUnique({ where: { id } });
     if (!listing) throw new NotFoundException('Listing not found');
 
-    // 1. Same property type and suburb
+    // Search by property type and suburb
     let similar = await this.prisma.listing.findMany({
       where: {
         id: { not: id },
@@ -254,14 +259,14 @@ export class ListingsService {
       orderBy: { listedAt: 'desc' },
     });
 
-    // 2. Fallback to same type + within price range (+/- 20%)
+    // Fallback to same type + within price range
     if (similar.length < 3) {
       const priceMin = Number(listing.price) * 0.8;
       const priceMax = Number(listing.price) * 1.2;
-      
+
       const additional = await this.prisma.listing.findMany({
         where: {
-          id: { notIn: [id, ...similar.map(l => l.id)] },
+          id: { notIn: [id, ...similar.map((l) => l.id)] },
           propertyType: listing.propertyType,
           price: { gte: priceMin, lte: priceMax },
           status: 'ACTIVE',
@@ -272,6 +277,6 @@ export class ListingsService {
       similar = [...similar, ...additional];
     }
 
-    return similar.map(l => this.sanitize(l, false));
+    return similar.map((l) => this.sanitize(l, false));
   }
 }

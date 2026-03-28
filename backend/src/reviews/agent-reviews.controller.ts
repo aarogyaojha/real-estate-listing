@@ -1,5 +1,10 @@
 import { Controller, Post, Body, Param, Get, UseGuards } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiCookieAuth } from '@nestjs/swagger';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiResponse,
+  ApiCookieAuth,
+} from '@nestjs/swagger';
 import { AgentReviewsService } from './agent-reviews.service';
 import { CreateAgentReviewDto } from './dto/create-agent-review.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
@@ -18,7 +23,7 @@ export class AgentReviewsController {
   async create(
     @Param('agentId') agentId: string,
     @CurrentUser() user: any,
-    @Body() dto: CreateAgentReviewDto
+    @Body() dto: CreateAgentReviewDto,
   ) {
     return this.reviewsService.create(agentId, user.userId, dto);
   }

@@ -65,16 +65,16 @@ export default function ListingDetailPage() {
       </div>
 
       <div className="flex gap-3 flex-wrap">
-        <Badge variant="outline" className="text-sm px-3 py-1">🛏 {listing.bedrooms} Bedrooms</Badge>
-        <Badge variant="outline" className="text-sm px-3 py-1">🚿 {listing.bathrooms} Bathrooms</Badge>
+        <Badge variant="outline" className="text-sm px-3 py-1">{listing.bedrooms} Bedrooms</Badge>
+        <Badge variant="outline" className="text-sm px-3 py-1">{listing.bathrooms} Bathrooms</Badge>
         {listing.parkingSpaces > 0 && (
-          <Badge variant="outline" className="text-sm px-3 py-1">🚗 {listing.parkingSpaces} Parking</Badge>
+          <Badge variant="outline" className="text-sm px-3 py-1">{listing.parkingSpaces} Parking</Badge>
         )}
         {listing.landSizeSqm && (
-          <Badge variant="outline" className="text-sm px-3 py-1">📐 Land: {listing.landSizeSqm} m²</Badge>
+          <Badge variant="outline" className="text-sm px-3 py-1">Land: {listing.landSizeSqm} m²</Badge>
         )}
         {listing.floorSizeSqm && (
-          <Badge variant="outline" className="text-sm px-3 py-1">🏢 Floor: {listing.floorSizeSqm} m²</Badge>
+          <Badge variant="outline" className="text-sm px-3 py-1">Floor: {listing.floorSizeSqm} m²</Badge>
         )}
       </div>
 
@@ -99,9 +99,9 @@ export default function ListingDetailPage() {
               </Link>
               <p className="text-muted-foreground text-sm">{listing.agent.agencyName}</p>
               {listing.agent.phone && (
-                <p className="text-sm">📞 {listing.agent.phone}</p>
+                <p className="text-sm">Phone: {listing.agent.phone}</p>
               )}
-              <p className="text-sm text-muted-foreground">✉️ {listing.agent.email}</p>
+              <p className="text-sm text-muted-foreground">Email: {listing.agent.email}</p>
             </CardContent>
           </Card>
           

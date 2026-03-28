@@ -1,4 +1,8 @@
-import { Injectable, UnauthorizedException, ConflictException } from '@nestjs/common';
+import {
+  Injectable,
+  UnauthorizedException,
+  ConflictException,
+} from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 import { PrismaService } from '../prisma/prisma.service';
@@ -14,7 +18,9 @@ export class AuthService {
   ) {}
 
   async register(dto: RegisterDto) {
-    const existing = await this.prisma.user.findUnique({ where: { username: dto.username } });
+    const existing = await this.prisma.user.findUnique({
+      where: { username: dto.username },
+    });
     if (existing) throw new ConflictException('Username already taken');
 
     const passwordHash = await bcrypt.hash(dto.password, 12);
@@ -29,7 +35,9 @@ export class AuthService {
   }
 
   async login(dto: LoginDto) {
-    const user = await this.prisma.user.findUnique({ where: { username: dto.username } });
+    const user = await this.prisma.user.findUnique({
+      where: { username: dto.username },
+    });
     if (!user) throw new UnauthorizedException('Invalid credentials');
 
     const isMatch = await bcrypt.compare(dto.password, user.passwordHash);
@@ -39,7 +47,9 @@ export class AuthService {
   }
 
   async refreshTokens(userId: string, refreshToken: string) {
-    const validToken = await this.prisma.refreshToken.findUnique({ where: { token: refreshToken } });
+    const validToken = await this.prisma.refreshToken.findUnique({
+      where: { token: refreshToken },
+    });
     if (!validToken || validToken.expiresAt < new Date()) {
       if (validToken) {
         await this.prisma.refreshToken.delete({ where: { id: validToken.id } });
@@ -64,12 +74,15 @@ export class AuthService {
     const payload = { sub: userId, username, role };
 
     const accessToken = this.jwtService.sign(payload, {
-      secret: process.env.JWT_ACCESS_SECRET || 'change_me_access_secret_min_32_chars',
+      secret:
+        process.env.JWT_ACCESS_SECRET || 'change_me_access_secret_min_32_chars',
       expiresIn: '15m',
     });
 
     const refreshToken = this.jwtService.sign(payload, {
-      secret: process.env.JWT_REFRESH_SECRET || 'change_me_refresh_secret_min_32_chars',
+      secret:
+        process.env.JWT_REFRESH_SECRET ||
+        'change_me_refresh_secret_min_32_chars',
       expiresIn: '7d',
     });
 

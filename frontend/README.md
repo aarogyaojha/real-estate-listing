@@ -1,17 +1,24 @@
-# Frontend — Next.js App
+# Frontend — Next.js Application
 
-Search interface for the real-estate-listing platform.
+Highly interactive property search interface for the real-estate broker's platform.
 
-## Stack
+## Features
 
-| Package           | Purpose                                      |
-|-------------------|----------------------------------------------|
-| Next.js 14        | App Router, server + client components       |
-| TypeScript        | Type safety throughout                       |
-| shadcn/ui         | Component library (Tailwind-based)           |
-| Tailwind CSS      | Utility-first styling                        |
-| TanStack Query v5 | Server state — caching, refetching           |
-| Sonner            | Toast notifications                          |
+- Dynamic Search Interface: Filter by price, layout, property type, and keyword.
+- URL Parameter Sync: Search states are synchronized to the URL for easy sharing.
+- Market Analysis: Property detail pages include historical price tracking.
+- Client Engagement: Integrated agent review system and lead enquiry forms.
+- Administration: Full dashboard for authorized personnel to manage agents and properties.
+
+## Architecture
+
+| Layer | System |
+|-------|--------|
+| Framework | Next.js 14 |
+| UI | shadcn/ui |
+| State | TanStack Query |
+| Animation | Framer Motion |
+| Components | Client/Server Rendering |
 
 ## Setup
 
@@ -19,25 +26,13 @@ Search interface for the real-estate-listing platform.
 cd frontend
 cp .env.example .env.local
 npm install
-npm run dev   # http://localhost:3001
+npm run dev
 ```
 
-## Environment variables
+The application runs on `http://localhost:3001`.
 
-| Variable              | Description              | Default                      |
-|-----------------------|--------------------------|------------------------------|
-| NEXT_PUBLIC_API_URL   | NestJS API base URL      | http://localhost:3000/api    |
-
-## Pages
-
-- `/listings` — Filter and browse property listings with URL-synced filters
-- `/listings/[id]` — Full detail with agent info and admin panel (admin only)
-- `/login` — Login with toast and redirect
-- `/register` — Register with redirect to login
-
-## Running tests
+## Local Testing
 
 ```bash
-npm run test        # Jest + React Testing Library
+npm run test
 ```
-

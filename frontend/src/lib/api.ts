@@ -186,6 +186,10 @@ export async function fetchSavedListings() {
   return apiFetch<any[]>('/listings/saved');
 }
 
+export async function createAgent(body: Record<string, any>) {
+  return apiFetch<any>('/agents', { method: 'POST', body: JSON.stringify(body) });
+}
+
 export async function createListing(body: Record<string, any>) {
   return apiFetch<any>('/listings', { method: 'POST', body: JSON.stringify(body) });
 }

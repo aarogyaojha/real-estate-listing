@@ -4,12 +4,10 @@ import * as bcrypt from 'bcrypt';
 const prisma = new PrismaClient();
 
 async function main() {
-  console.log('Starting seed...');
-  console.log('Hashing passwords...');
+  console.log('Seeding database...');
   const adminPassword = await bcrypt.hash('Admin@123', 12);
   const userPassword = await bcrypt.hash('User@123', 12);
 
-  console.log('Upserting admin user...');
   const admin = await prisma.user.upsert({
     where: { username: 'aarogyaojha' },
     update: {},
@@ -20,7 +18,6 @@ async function main() {
     },
   });
 
-  console.log('Upserting test user...');
   const user = await prisma.user.upsert({
     where: { username: 'testuser' },
     update: {},
@@ -31,7 +28,6 @@ async function main() {
     },
   });
 
-  console.log('Upserting agents...');
   const agents = await Promise.all([
     prisma.agent.upsert({ where: { email: 'agent1@example.com' }, update: {}, create: { name: 'Alice Smith', email: 'agent1@example.com', phone: '0412345678', agencyName: 'Luxury Real Estate' } }),
     prisma.agent.upsert({ where: { email: 'agent2@example.com' }, update: {}, create: { name: 'Bob Jones', email: 'agent2@example.com', phone: '0423456789', agencyName: 'City Homes' } }),
@@ -44,7 +40,6 @@ async function main() {
   const propertyTypes = ['HOUSE', 'APARTMENT', 'TOWNHOUSE', 'LAND', 'COMMERCIAL'] as const;
   const statuses = ['ACTIVE', 'UNDER_CONTRACT', 'SOLD', 'WITHDRAWN'] as const;
 
-  console.log('Creating listings...');
   for (let i = 1; i <= 25; i++) {
     const randomAgent = agents[Math.floor(Math.random() * agents.length)];
     const randomSuburb = suburbs[Math.floor(Math.random() * suburbs.length)];
@@ -53,11 +48,19 @@ async function main() {
     const price = Math.floor(Math.random() * 45000000) + 5000000;
     const bedrooms = Math.floor(Math.random() * 5) + 1;
     const bathrooms = Math.floor(Math.random() * 3) + 1;
+
+    const descriptions = [
+      `Spacious ${randomType.toLowerCase()} featuring ${bedrooms} modern bedrooms and ${bathrooms} bathrooms in the heart of ${randomSuburb}.`,
+      `A stunning ${bedrooms}-bedroom ${randomType.toLowerCase()} offering premium finishes and open-plan living in ${randomSuburb}.`,
+      `Excellent opportunity to secure a ${randomType.toLowerCase()} in ${randomSuburb} with ${bedrooms} bedrooms and ample living space.`,
+      `Well-maintained ${randomType.toLowerCase()} located in a prime ${randomSuburb} street, perfect for families with ${bedrooms} large bedrooms.`,
+    ];
+    const description = descriptions[Math.floor(Math.random() * descriptions.length)];
     
     await prisma.listing.create({
       data: {
         title: `Beautiful ${randomType.toLowerCase()} in ${randomSuburb}`,
-        description: `This is a great property with ${bedrooms} bedrooms and ${bathrooms} bathrooms.`,
+        description,
         price,
         suburb: randomSuburb,
         state: 'Bagmati',
@@ -75,7 +78,7 @@ async function main() {
     });
   }
 
-  console.log('Seed completed!');
+  console.log('Seed completed successfully');
 }
 
 main()

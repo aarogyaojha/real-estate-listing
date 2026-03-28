@@ -1,5 +1,25 @@
-import { Controller, Get, Post, Body, Query, Param, UseGuards, ForbiddenException, Delete, Patch, Request } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiQuery, ApiResponse, ApiParam, ApiCookieAuth, ApiBody } from '@nestjs/swagger';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Query,
+  Param,
+  UseGuards,
+  ForbiddenException,
+  Delete,
+  Patch,
+  Request,
+} from '@nestjs/common';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiQuery,
+  ApiResponse,
+  ApiParam,
+  ApiCookieAuth,
+  ApiBody,
+} from '@nestjs/swagger';
 import { ListingsService } from './listings.service';
 import { SearchListingsDto } from './dto/search-listings.dto';
 import { CreateListingDto } from './dto/create-listing.dto';
@@ -46,7 +66,11 @@ export class ListingsController {
   @ApiResponse({ status: 200, description: 'Paginated listing results' })
   @ApiCookieAuth('access_token')
   async findAll(@Query() dto: SearchListingsDto, @CurrentUser() user: any) {
-    return this.listingsService.findAll(dto, user?.role === UserRole.ADMIN, user?.userId);
+    return this.listingsService.findAll(
+      dto,
+      user?.role === UserRole.ADMIN,
+      user?.userId,
+    );
   }
 
   @Get('suburbs')
@@ -108,7 +132,11 @@ export class ListingsController {
   @UseGuards(JwtAuthGuard)
   @ApiOperation({ summary: 'Save a search' })
   async createSavedSearch(@Request() req, @Body() dto: CreateSavedSearchDto) {
-    return this.listingsService.createSavedSearch(req.user.id, dto.name, dto.filtersJSON);
+    return this.listingsService.createSavedSearch(
+      req.user.id,
+      dto.name,
+      dto.filtersJSON,
+    );
   }
 
   @Get('saved-searches')
@@ -133,6 +161,10 @@ export class ListingsController {
   @ApiResponse({ status: 404, description: 'Not found' })
   @ApiCookieAuth('access_token')
   async findOne(@Param('id') id: string, @CurrentUser() user: any) {
-    return this.listingsService.findOne(id, user?.role === UserRole.ADMIN, user?.userId);
+    return this.listingsService.findOne(
+      id,
+      user?.role === UserRole.ADMIN,
+      user?.userId,
+    );
   }
 }

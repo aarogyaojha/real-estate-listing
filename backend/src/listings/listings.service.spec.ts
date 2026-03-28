@@ -44,8 +44,15 @@ describe('ListingsService logic', () => {
 
   describe('buildWhereClause()', () => {
     it('should produce correct where for suburb + price range', () => {
-      const where = buildWhereClause({ suburb: 'Kathmandu', price_min: 5000000, price_max: 20000000 });
-      expect(where.suburb).toEqual({ equals: 'Kathmandu', mode: 'insensitive' });
+      const where = buildWhereClause({
+        suburb: 'Kathmandu',
+        price_min: 5000000,
+        price_max: 20000000,
+      });
+      expect(where.suburb).toEqual({
+        equals: 'Kathmandu',
+        mode: 'insensitive',
+      });
       expect(where.price?.gte).toBe(5000000);
       expect(where.price?.lte).toBe(20000000);
     });

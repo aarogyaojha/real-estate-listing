@@ -10,12 +10,12 @@ import { AgentReviewsModule } from './reviews/agent-reviews.module';
 
 @Module({
   imports: [
-    PrismaModule, 
-    AuthModule, 
-    ListingsModule, 
-    AgentsModule, 
-    EnquiriesModule, 
-    AgentReviewsModule
+    PrismaModule,
+    AuthModule,
+    ListingsModule,
+    AgentsModule,
+    EnquiriesModule,
+    AgentReviewsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

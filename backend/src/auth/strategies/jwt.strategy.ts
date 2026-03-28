@@ -11,11 +11,16 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
         (req: Request) => req?.cookies?.access_token,
       ]),
       ignoreExpiration: false,
-      secretOrKey: process.env.JWT_ACCESS_SECRET || 'change_me_access_secret_min_32_chars',
+      secretOrKey:
+        process.env.JWT_ACCESS_SECRET || 'change_me_access_secret_min_32_chars',
     });
   }
 
   async validate(payload: any) {
-    return { userId: payload.sub, username: payload.username, role: payload.role };
+    return {
+      userId: payload.sub,
+      username: payload.username,
+      role: payload.role,
+    };
   }
 }

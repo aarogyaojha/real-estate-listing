@@ -1,37 +1,58 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  ConflictException,
+} from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { ListingsService } from '../listings/listings.service';
 import { SearchListingsDto } from '../listings/dto/search-listings.dto';
+import { CreateAgentDto } from './dto/create-agent.dto';
 
 @Injectable()
 export class AgentsService {
   constructor(
     private readonly prisma: PrismaService,
-    private readonly listingsService: ListingsService
+    private readonly listingsService: ListingsService,
   ) {}
+
+  async create(data: CreateAgentDto) {
+    const existingAgent = await this.prisma.agent.findUnique({
+      where: { email: data.email },
+    });
+
+    if (existingAgent) {
+      throw new ConflictException('Agent with this email already exists');
+    }
+
+    return this.prisma.agent.create({
+      data,
+    });
+  }
 
   async findAll() {
     const agents = await this.prisma.agent.findMany();
-    
+
     // Enrich with ratings
-    return Promise.all(agents.map(async (agent) => {
-      const stats = await this.prisma.agentReview.aggregate({
-        where: { agentId: agent.id },
-        _avg: { rating: true },
-        _count: true,
-      });
+    return Promise.all(
+      agents.map(async (agent) => {
+        const stats = await this.prisma.agentReview.aggregate({
+          where: { agentId: agent.id },
+          _avg: { rating: true },
+          _count: true,
+        });
 
-      const listingCount = await this.prisma.listing.count({
-        where: { agentId: agent.id, status: 'ACTIVE' },
-      });
+        const listingCount = await this.prisma.listing.count({
+          where: { agentId: agent.id, status: 'ACTIVE' },
+        });
 
-      return {
-        ...agent,
-        avgRating: stats._avg.rating || 0,
-        reviewCount: stats._count || 0,
-        activeListingCount: listingCount,
-      };
-    }));
+        return {
+          ...agent,
+          avgRating: stats._avg.rating || 0,
+          reviewCount: stats._count || 0,
+          activeListingCount: listingCount,
+        };
+      }),
+    );
   }
 
   async findOne(id: string, query: SearchListingsDto) {
@@ -64,7 +85,9 @@ export class AgentsService {
       this.prisma.listing.count({ where: listingsWhere }),
     ]);
 
-    const sanitizedListings = items.map(l => this.listingsService.sanitize(l, false));
+    const sanitizedListings = items.map((l) =>
+      this.listingsService.sanitize(l, false),
+    );
 
     const ratings = await this.prisma.agentReview.aggregate({
       where: { agentId: id },
@@ -85,35 +108,39 @@ export class AgentsService {
           page,
           limit,
           totalPages: Math.ceil(total / limit),
-        }
-      }
+        },
+      },
     };
   }
 
   async getAdminStats() {
     const agents = await this.prisma.agent.findMany();
-    
-    return Promise.all(agents.map(async (agent) => {
-      const stats = await this.prisma.listing.groupBy({
-        by: ['status'],
-        where: { agentId: agent.id },
-        _count: true,
-        _avg: { price: true },
-      });
 
-      const totalListings = await this.prisma.listing.count({ where: { agentId: agent.id } });
+    return Promise.all(
+      agents.map(async (agent) => {
+        const stats = await this.prisma.listing.groupBy({
+          by: ['status'],
+          where: { agentId: agent.id },
+          _count: true,
+          _avg: { price: true },
+        });
 
-      return {
-        agentId: agent.id,
-        agentName: agent.name,
-        totalListings,
-        stats: stats.map(s => ({
-          status: s.status,
-          count: s._count,
-          avgPrice: s._avg.price || 0,
-        })),
-      };
-    }));
+        const totalListings = await this.prisma.listing.count({
+          where: { agentId: agent.id },
+        });
+
+        return {
+          agentId: agent.id,
+          agentName: agent.name,
+          totalListings,
+          stats: stats.map((s) => ({
+            status: s.status,
+            count: s._count,
+            avgPrice: s._avg.price || 0,
+          })),
+        };
+      }),
+    );
   }
 
   async update(id: string, data: any) {

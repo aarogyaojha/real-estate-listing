@@ -46,7 +46,7 @@ export function ListingCard({ listing, onToggle }: ListingCardProps) {
     setIsSaved(!!l.isSaved);
   }, [l.isSaved]);
 
-  const showHeart = user && !user.isAdmin;
+  const showHeart = user && user.role !== 'ADMIN';
 
   async function handleSave(e: React.MouseEvent) {
     e.preventDefault();
@@ -112,9 +112,9 @@ export function ListingCard({ listing, onToggle }: ListingCardProps) {
         </CardContent>
         <CardFooter>
           <div className="flex gap-3 text-sm text-muted-foreground">
-            <span>🛏 {l.bedrooms} bed</span>
-            <span>🚿 {l.bathrooms} bath</span>
-            {l.parkingSpaces > 0 && <span>🚗 {l.parkingSpaces}</span>}
+            <span>{l.bedrooms} bed</span>
+            <span>{l.bathrooms} bath</span>
+            {l.parkingSpaces > 0 && <span>{l.parkingSpaces} car</span>}
           </div>
         </CardFooter>
       </Card>

@@ -7,18 +7,24 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
+import { AddAgentForm } from '@/components/AddAgentForm';
 
 export default function AdminDashboard() {
   const { user } = useAuth();
   const [stats, setStats] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
+  const fetchStats = () => {
+    setLoading(true);
+    apiFetch<any[]>('/agents/stats').then(res => {
+      setStats(Array.isArray(res) ? res : (res as any).data || []);
+      setLoading(false);
+    }).catch(() => setLoading(false));
+  };
+
   useEffect(() => {
     if (user?.role === 'ADMIN') {
-      apiFetch<any[]>('/agents/stats').then(res => {
-        setStats(Array.isArray(res) ? res : (res as any).data || []);
-        setLoading(false);
-      });
+      fetchStats();
     }
   }, [user]);
 
@@ -26,9 +32,12 @@ export default function AdminDashboard() {
 
   return (
     <div className="container mx-auto py-8 px-4 space-y-8">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold">Admin Dashboard</h1>
-        <p className="text-muted-foreground">Monitor platform performance and agent activity.</p>
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4 mb-8">
+        <div>
+          <h1 className="text-3xl font-bold">Admin Dashboard</h1>
+          <p className="text-muted-foreground">Monitor platform performance and agent activity.</p>
+        </div>
+        <AddAgentForm onSuccess={fetchStats} />
       </div>
 
       <Card className="border-primary/20 shadow-lg shadow-primary/5">

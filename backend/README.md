@@ -1,66 +1,43 @@
 # Backend — NestJS API
 
-REST API for the real-estate-listing platform.
+The core REST engine for the real-estate-listing platform.
 
-## Stack
+## Architecture
 
-| Package               | Purpose                                  |
-|-----------------------|------------------------------------------|
-| NestJS 10             | Framework — modules, controllers, guards |
-| Prisma                | ORM + migration runner                   |
-| PostgreSQL 15         | Relational database (via Docker)         |
-| @nestjs/jwt           | JWT signing and verification             |
-| @nestjs/passport      | Passport.js integration                  |
-| bcrypt                | Password hashing (saltRounds: 12)        |
-| class-validator       | DTO validation                           |
-| @nestjs/swagger       | OpenAPI / Swagger UI                     |
+| Layer | Implementation |
+|-------|----------------|
+| Framework | NestJS 11 |
+| ORM | Prisma |
+| Database | PostgreSQL 15 |
+| Auth | @nestjs/jwt |
+| Validator | class-validator |
 
-## Setup
+## Local Development
+
+Ensure the database is running via `docker-compose up -d` then:
 
 ```bash
-# From repo root — start Postgres first
-docker-compose up -d
-
 cd backend
 cp .env.example .env
 npm install
 npx prisma migrate dev --name init
 npx prisma db seed
-npm run start:dev   # http://localhost:3000
+npm run start:dev
 ```
 
-Swagger UI: http://localhost:3000/api-docs
+## API Documentation
 
-## Environment variables
+Interactive Swagger documentation is active at: `http://localhost:3000/api-docs`.
 
-| Variable              | Description                          |
-|-----------------------|--------------------------------------|
-| DATABASE_URL          | Prisma connection string             |
-| JWT_ACCESS_SECRET     | Secret for access tokens (min 32 ch) |
-| JWT_REFRESH_SECRET    | Secret for refresh tokens            |
-| ACCESS_TOKEN_EXPIRY   | Access token TTL (default: 15m)      |
-| REFRESH_TOKEN_EXPIRY  | Refresh token TTL (default: 7d)      |
-| PORT                  | API port (default: 3000)             |
+## Key Logic
 
-## API endpoints
+- Role-Based Field Access: Sensitivity-aware serialization ensuring `internalNotes` are only sent to authenticated administrators.
+- Asset Lifecycle: Listing price changes are automatically tracked via the `ListingPriceHistory` table.
+- Discovery: Integrated property similarity recommendations based on location and type.
 
-| Method | Path                   | Auth     | Description                          |
-|--------|------------------------|----------|--------------------------------------|
-| POST   | /api/auth/register     | Public   | Create account                       |
-| POST   | /api/auth/login        | Public   | Login — sets httpOnly cookies        |
-| POST   | /api/auth/refresh      | Refresh  | Rotate access + refresh tokens       |
-| POST   | /api/auth/logout       | Access   | Revoke token, clear cookies          |
-| GET    | /api/auth/me           | Access   | Current user info                    |
-| GET    | /api/listings          | Optional | Search + filter listings (paginated) |
-| GET    | /api/listings/:id      | Optional | Single listing detail                |
-| GET    | /api/agents            | Public   | List all agents                      |
-| GET    | /api/agents/:id        | Public   | Agent + their active listings        |
-
-## Running tests
+## Testing
 
 ```bash
-npm run test        # unit tests
-npm run test:e2e    # integration tests
-npm run test:cov    # coverage report
+npm run test
+npm run test:e2e
 ```
-

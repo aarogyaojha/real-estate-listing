@@ -10,7 +10,8 @@ export class AgentReviewsService {
     const existing = await this.prisma.agentReview.findUnique({
       where: { agentId_userId: { agentId, userId } },
     });
-    if (existing) throw new ConflictException('You have already reviewed this agent');
+    if (existing)
+      throw new ConflictException('You have already reviewed this agent');
 
     return this.prisma.agentReview.create({
       data: {

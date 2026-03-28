@@ -7,10 +7,14 @@ export class EnquiriesService {
   constructor(private prisma: PrismaService) {}
 
   async create(dto: CreateEnquiryDto) {
-    const listing = await this.prisma.listing.findUnique({ where: { id: dto.listingId } });
+    const listing = await this.prisma.listing.findUnique({
+      where: { id: dto.listingId },
+    });
     if (!listing) throw new NotFoundException('Listing not found');
 
-    const agent = await this.prisma.agent.findUnique({ where: { id: dto.agentId } });
+    const agent = await this.prisma.agent.findUnique({
+      where: { id: dto.agentId },
+    });
     if (!agent) throw new NotFoundException('Agent not found');
 
     const enquiry = await this.prisma.enquiry.create({

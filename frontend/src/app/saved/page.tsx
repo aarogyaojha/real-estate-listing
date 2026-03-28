@@ -58,7 +58,7 @@ export default function SavedListingsPage() {
       {listings.length === 0 ? (
         <div className="text-center py-20 space-y-3">
           <p className="text-xl font-medium">No saved properties yet</p>
-          <p className="text-muted-foreground">Browse listings and click the ❤️ to save ones you like</p>
+          <p className="text-muted-foreground">Browse listings and click the save icon to keep track of ones you like</p>
           <Link href="/listings"><Button>Browse Properties</Button></Link>
         </div>
       ) : (

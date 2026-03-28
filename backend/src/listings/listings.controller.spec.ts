@@ -25,7 +25,7 @@ const mockListings = [
     parkingSpaces: 1,
     status: 'ACTIVE',
     internalNotes: 'Secret note',
-  }
+  },
 ];
 
 describe('ListingsController (inline)', () => {
@@ -49,23 +49,36 @@ describe('ListingsController (inline)', () => {
   });
 
   it('findAll with suburb should call service with that suburb', async () => {
-    mockSvc.findAll.mockResolvedValue({ data: [], meta: { total: 0, page: 1, limit: 12, totalPages: 0 } });
+    mockSvc.findAll.mockResolvedValue({
+      data: [],
+      meta: { total: 0, page: 1, limit: 12, totalPages: 0 },
+    });
     await mockSvc.findAll({ suburb: 'Kathmandu' }, false);
-    expect(mockSvc.findAll).toHaveBeenCalledWith(expect.objectContaining({ suburb: 'Kathmandu' }), false);
+    expect(mockSvc.findAll).toHaveBeenCalledWith(
+      expect.objectContaining({ suburb: 'Kathmandu' }),
+      false,
+    );
   });
 
   it('findAll with price range should pass price_min and price_max', async () => {
-    mockSvc.findAll.mockResolvedValue({ data: [], meta: { total: 0, page: 1, limit: 12, totalPages: 0 } });
+    mockSvc.findAll.mockResolvedValue({
+      data: [],
+      meta: { total: 0, page: 1, limit: 12, totalPages: 0 },
+    });
     await mockSvc.findAll({ price_min: 10000000, price_max: 30000000 }, false);
     expect(mockSvc.findAll).toHaveBeenCalledWith(
       expect.objectContaining({ price_min: 10000000, price_max: 30000000 }),
-      false
+      false,
     );
   });
 
   it('findOne should throw NotFoundException for unknown id', async () => {
-    mockSvc.findOne.mockRejectedValue(new NotFoundException('Listing not found'));
-    await expect(mockSvc.findOne('unknown-uuid', false)).rejects.toThrow(NotFoundException);
+    mockSvc.findOne.mockRejectedValue(
+      new NotFoundException('Listing not found'),
+    );
+    await expect(mockSvc.findOne('unknown-uuid', false)).rejects.toThrow(
+      NotFoundException,
+    );
   });
 
   it('sanitize with isAdmin=false should not include status or internalNotes', () => {

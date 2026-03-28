@@ -42,7 +42,7 @@ export function AdminPanel({ listingId, status: initialStatus, internalNotes }: 
     <Card className="border-l-4 border-l-amber-500 bg-amber-50/50">
       <CardHeader className="pb-2">
         <CardTitle className="text-sm font-semibold text-amber-700 uppercase tracking-wide flex items-center justify-between">
-          <span>🔒 Admin Panel</span>
+          <span>Admin Panel</span>
            <span className={`inline-block text-[10px] font-bold px-2 py-0.5 rounded-full border ${statusColors[status] || 'bg-gray-100'}`}>
             {status}
           </span>
