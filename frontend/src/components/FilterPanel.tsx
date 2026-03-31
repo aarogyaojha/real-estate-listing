@@ -1,16 +1,9 @@
 'use client';
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { Slider } from '@/components/ui/slider';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
 import { Input } from '@/components/ui/input';
 import { ListingFilters } from '@/lib/api';
 
@@ -52,6 +45,9 @@ export function FilterPanel({
     filters.price_max ?? priceRange.max,
   ]);
 
+  const [isMounted, setIsMounted] = useState(false);
+  useEffect(() => setIsMounted(true), []);
+
   const handleClear = useCallback(() => {
     setPriceSlider([priceRange.min, priceRange.max]);
     onFilterChange({
@@ -64,7 +60,7 @@ export function FilterPanel({
       property_type: undefined,
       keyword: undefined,
     });
-  }, [onFilterChange, priceRange]);
+  }, [onFilterChange, priceRange, setPriceSlider]);
 
   function toggleSuburb(s: string) {
     const current = filters.suburbs ? filters.suburbs.split(',').filter(Boolean) : [];
@@ -73,6 +69,8 @@ export function FilterPanel({
   }
 
   const selectedSuburbs = filters.suburbs ? filters.suburbs.split(',').filter(Boolean) : [];
+
+  if (!isMounted) return null;
 
   return (
     <div className="space-y-5 rounded-xl border bg-card p-5 shadow-sm">

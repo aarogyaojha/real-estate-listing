@@ -73,7 +73,28 @@ The following accounts are seeded by default:
 
 ## API Usage
 
-The API includes full OpenAPI documentation available at `http://localhost:3000/api-docs` once the server is running.
+The full OpenAPI documentation is available at `http://localhost:3000/api-docs`.
+
+Below are some example API calls to interact with the backend:
+
+**1. Search for Listings (with filters and pagination):**
+```bash
+curl -X GET "http://localhost:3000/listings?suburb=Kathmandu&price_max=50000000&bedrooms=3&page=1&limit=10"
+```
+
+**2. Get a Specific Listing by ID:**
+```bash
+curl -X GET "http://localhost:3000/listings/8c51a92e-5c4d-44a7-8c43-b1d1f5e8e7f1"
+```
+
+**3. Login (Authenticate as an Admin to get access tokens in HttpOnly cookies):**
+```bash
+curl -X POST "http://localhost:3000/auth/login" \
+  -H "Content-Type: application/json" \
+  -d '{"username":"aarogyaojha","password":"Admin@123"}' \
+  -v
+```
+*(The API will return `Set-Cookie` headers containing `access_token` and `refresh_token`)*
 
 ---
 [MIT](./LICENSE) © 2026 aarogyaojha

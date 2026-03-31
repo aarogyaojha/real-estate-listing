@@ -1,29 +1,28 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { apiFetch } from '@/lib/api';
+import { apiFetch, Listing, Agent } from '@/lib/api';
 import { useAuth } from '@/hooks/useAuth';
 import { ListingCard } from '@/components/ListingCard';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 
 export default function AgentPortal() {
   const { user } = useAuth();
-  const [listings, setListings] = useState<any[]>([]);
+  const [listings, setListings] = useState<Listing[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     if (user?.role === 'AGENT') {
       // Find all agents first to find the one matching the current user's userId
       // In a real app, this information should be part of the User object in AuthContext
-      apiFetch<any[]>('/agents').then(agents => {
-        const agentsList = Array.isArray(agents) ? agents : (agents as any).data ?? [];
-        const myAgent = agentsList.find((a: any) => a.userId === user.userId);
+      apiFetch<Agent[]>('/agents').then(agents => {
+        const agentsList = Array.isArray(agents) ? agents : (agents as unknown as { data: Agent[] }).data ?? [];
+        const myAgent = agentsList.find((a: Agent) => a.userId === user.userId);
         if (myAgent) {
-          apiFetch<any>(`/agents/${myAgent.id}`).then(res => {
-            const data = (res as any).listings?.data || (res as any).listings || [];
+          apiFetch<{ listings: { data: Listing[] } | Listing[] }>(`/agents/${myAgent.id}`).then(res => {
+            const data = Array.isArray(res.listings) ? res.listings : res.listings?.data || [];
             setListings(data);
             setLoading(false);
           });
@@ -56,7 +55,7 @@ export default function AgentPortal() {
           </div>
         ) : listings.length === 0 ? (
           <div className="py-20 text-center border rounded-xl border-dashed bg-muted/20">
-            <p className="text-muted-foreground">You haven't added any listings yet.</p>
+            <p className="text-muted-foreground">You haven&apos;t added any listings yet.</p>
             <Link href="/listings/new" className="text-primary hover:underline mt-2 inline-block">Create your first listing</Link>
           </div>
         ) : (

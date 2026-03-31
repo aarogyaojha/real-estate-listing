@@ -2,25 +2,35 @@
 
 import { useEffect, useState } from 'react';
 import { useAuthContext } from '@/context/auth.context';
-import { fetchSavedListings } from '@/lib/api';
+import { fetchSavedListings, Listing } from '@/lib/api';
 import { ListingCard } from '@/components/ListingCard';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 
 export default function SavedListingsPage() {
   const { user, isLoading } = useAuthContext();
-  const [listings, setListings] = useState<any[]>([]);
+  const [listings, setListings] = useState<Listing[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    let mounted = true;
     if (!user) {
-      setLoading(false);
-      return;
+      setTimeout(() => {
+        if (mounted) setLoading(false);
+      }, 0);
+      return () => { mounted = false; };
     }
     fetchSavedListings()
-      .then((data: any) => setListings(Array.isArray(data) ? data : data?.data ?? []))
-      .catch(() => setListings([]))
-      .finally(() => setLoading(false));
+      .then((data: any) => {
+        if (mounted) setListings(Array.isArray(data) ? data : data?.data ?? []);
+      })
+      .catch(() => {
+        if (mounted) setListings([]);
+      })
+      .finally(() => {
+        if (mounted) setLoading(false);
+      });
+    return () => { mounted = false; };
   }, [user]);
 
   if (isLoading || loading) {

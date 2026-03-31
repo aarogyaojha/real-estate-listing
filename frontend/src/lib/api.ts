@@ -94,108 +94,143 @@ export interface ListingFilters {
   limit?: number;
 }
 
+export interface Listing {
+  id: string;
+  title: string;
+  description: string;
+  price: number;
+  suburb: string;
+  state: string;
+  postcode: string;
+  propertyType: string;
+  bedrooms: number;
+  bathrooms: number;
+  parkingSpaces: number;
+  landSizeSqm?: number;
+  floorSizeSqm?: number;
+  status: string;
+  listedAt: string;
+  agent?: Agent;
+  internalNotes?: string;
+}
+
+export interface Agent {
+  id: string;
+  name: string;
+  email: string;
+  phone?: string;
+  agencyName: string;
+  bio?: string;
+  specialties: string[];
+  suburbCoverage: string[];
+  userId?: string;
+}
+
 export async function fetchListings(filters: ListingFilters = {}) {
   const params = new URLSearchParams();
   Object.entries(filters).forEach(([k, v]) => {
     if (v !== undefined && v !== '' && v !== null) params.set(k, String(v));
   });
   const qs = params.toString();
-  return apiFetch<any>(`/listings${qs ? `?${qs}` : ''}`);
+  return apiFetch<{ data: Listing[]; meta: any }>(`/listings${qs ? `?${qs}` : ''}`);
 }
 
 export async function fetchListing(id: string) {
-  return apiFetch<any>(`/listings/${id}`);
+  return apiFetch<Listing>(`/listings/${id}`);
 }
 
 export async function fetchAgents() {
-  return apiFetch<any>('/agents');
+  return apiFetch<Agent[]>('/agents');
 }
 
-export async function fetchAgent(id: string, params: Record<string, any> = {}) {
-  const qs = new URLSearchParams(params).toString();
-  return apiFetch<any>(`/agents/${id}${qs ? `?${qs}` : ''}`);
+export async function fetchAgent(id: string, params: Record<string, unknown> = {}) {
+  const qs = new URLSearchParams(params as Record<string, string>).toString();
+  return apiFetch<Agent>(`/agents/${id}${qs ? `?${qs}` : ''}`);
 }
 
 export async function fetchAgentReviews(agentId: string) {
-  return apiFetch<any[]>(`/agents/${agentId}/reviews`);
+  return apiFetch<unknown[]>(`/agents/${agentId}/reviews`);
 }
 
-export async function updateAgent(id: string, body: Record<string, any>) {
-  return apiFetch<any>(`/agents/${id}`, { method: 'PATCH', body: JSON.stringify(body) });
+export async function updateAgent(id: string, body: Record<string, unknown>) {
+  return apiFetch<Agent>(`/agents/${id}`, { method: 'PATCH', body: JSON.stringify(body) });
 }
 
 export async function fetchSimilarListings(id: string) {
-  return apiFetch<any[]>(`/listings/${id}/similar`);
+  return apiFetch<Listing[]>(`/listings/${id}/similar`);
 }
 
 export async function updateListingStatus(id: string, status: string) {
-  return apiFetch<any>(`/listings/${id}/status`, {
+  return apiFetch<Listing>(`/listings/${id}/status`, {
     method: 'PATCH',
     body: JSON.stringify({ status }),
   });
 }
 
 export async function fetchPriceHistory(id: string) {
-  return apiFetch<any[]>(`/listings/${id}/price-history`);
+  return apiFetch<unknown[]>(`/listings/${id}/price-history`);
 }
 
 export async function createSavedSearch(name: string, filtersJSON: string) {
-  return apiFetch<any>('/listings/saved-searches', {
+  return apiFetch<unknown>('/listings/saved-searches', {
     method: 'POST',
     body: JSON.stringify({ name, filtersJSON }),
   });
 }
 
 export async function fetchSavedSearches() {
-  return apiFetch<any[]>('/listings/saved-searches');
+  return apiFetch<unknown[]>('/listings/saved-searches');
 }
 
 export async function deleteSavedSearch(id: string) {
-  return apiFetch<any>(`/listings/saved-searches/${id}`, {
+  return apiFetch<unknown>(`/listings/saved-searches/${id}`, {
     method: 'DELETE',
   });
 }
 
 export async function login(body: { username: string; password: string }) {
-  return apiFetch<any>('/auth/login', {
+  return apiFetch<unknown>('/auth/login', {
     method: 'POST',
     body: JSON.stringify(body),
   });
 }
 
 export async function register(body: { username: string; password: string }) {
-  return apiFetch<any>('/auth/register', {
+  return apiFetch<unknown>('/auth/register', {
     method: 'POST',
     body: JSON.stringify(body),
   });
 }
 
 export async function logout() {
-  return apiFetch<any>('/auth/logout', { method: 'POST' });
+  return apiFetch<unknown>('/auth/logout', { method: 'POST' });
 }
 
 export async function getMe() {
-  return apiFetch<any>('/auth/me');
+  return apiFetch<unknown>('/auth/me');
 }
 
 export async function toggleSaveListing(id: string) {
-  return apiFetch<{ isSaved: boolean }>(`/listings/${id}/save`, { method: 'POST' });
+  return apiFetch<{ isSaved: boolean }>('/listings/save', { 
+    method: 'POST', 
+    body: JSON.stringify({ listingId: id }) 
+  });
 }
 
 export async function fetchSavedListings() {
-  return apiFetch<any[]>('/listings/saved');
+  return apiFetch<Listing[]>('/listings/saved');
 }
 
-export async function createAgent(body: Record<string, any>) {
-  return apiFetch<any>('/agents', { method: 'POST', body: JSON.stringify(body) });
+export async function createAgent(body: Record<string, unknown>) {
+  return apiFetch<Agent>('/agents', { method: 'POST', body: JSON.stringify(body) });
 }
 
-export async function createListing(body: Record<string, any>) {
-  return apiFetch<any>('/listings', { method: 'POST', body: JSON.stringify(body) });
+export async function createListing(body: Record<string, unknown>) {
+  return apiFetch<Listing>('/listings', { method: 'POST', body: JSON.stringify(body) });
 }
 
 export async function fetchAgentsSimple() {
-  return apiFetch<any[]>('/agents');
+  return apiFetch<Agent[]>('/agents');
 }
 
 export async function fetchSuburbs() {

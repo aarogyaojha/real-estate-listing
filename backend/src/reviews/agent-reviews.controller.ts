@@ -9,6 +9,7 @@ import { AgentReviewsService } from './agent-reviews.service';
 import { CreateAgentReviewDto } from './dto/create-agent-review.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
+import { User } from '../common/interfaces/user.interface';
 
 @ApiTags('Agent Reviews')
 @Controller('agents/:agentId/reviews')
@@ -22,7 +23,7 @@ export class AgentReviewsController {
   @ApiResponse({ status: 201, description: 'Review submitted' })
   async create(
     @Param('agentId') agentId: string,
-    @CurrentUser() user: any,
+    @CurrentUser() user: User,
     @Body() dto: CreateAgentReviewDto,
   ) {
     return this.reviewsService.create(agentId, user.userId, dto);

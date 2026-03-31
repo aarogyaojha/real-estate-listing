@@ -7,6 +7,7 @@ import { PrismaService } from '../prisma/prisma.service';
 import { ListingsService } from '../listings/listings.service';
 import { SearchListingsDto } from '../listings/dto/search-listings.dto';
 import { CreateAgentDto } from './dto/create-agent.dto';
+import { Prisma } from '@prisma/client';
 
 @Injectable()
 export class AgentsService {
@@ -143,7 +144,7 @@ export class AgentsService {
     );
   }
 
-  async update(id: string, data: any) {
+  async update(id: string, data: Prisma.AgentUpdateInput) {
     return this.prisma.agent.update({
       where: { id },
       data,

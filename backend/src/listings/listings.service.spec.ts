@@ -1,10 +1,14 @@
-function sanitize(listing: any, isAdmin: boolean) {
-  const { status, internalNotes, ...publicFields } = listing;
+function sanitize(listing: Record<string, unknown>, isAdmin: boolean) {
+  const {
+    status: _status,
+    internalNotes: _internalNotes,
+    ...publicFields
+  } = listing;
   if (isAdmin) return listing;
   return publicFields;
 }
 
-function buildWhereClause(dto: any) {
+function buildWhereClause(dto: Record<string, any>) {
   const where: any = {};
   if (dto.suburb) where.suburb = { equals: dto.suburb, mode: 'insensitive' };
   if (dto.price_min !== undefined || dto.price_max !== undefined) {

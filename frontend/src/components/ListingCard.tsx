@@ -3,23 +3,11 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card';
-import { toggleSaveListing } from '@/lib/api';
+import { toggleSaveListing, Listing } from '@/lib/api';
 import { useAuthContext } from '@/context/auth.context';
 
 interface ListingCardProps {
-  listing: {
-    data?: any;
-    id: string;
-    title: string;
-    price: number | string;
-    suburb: string;
-    state: string;
-    propertyType: string;
-    bedrooms: number;
-    bathrooms: number;
-    parkingSpaces?: number;
-    isSaved?: boolean;
-  };
+  listing: Listing;
   onToggle?: (id: string, isSaved: boolean) => void;
 }
 

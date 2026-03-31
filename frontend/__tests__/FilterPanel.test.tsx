@@ -11,16 +11,29 @@ describe('FilterPanel', () => {
     jest.clearAllMocks();
   });
 
-  it('typing in suburb input calls onFilterChange with { suburb }', () => {
+  it('renders suburb buttons and keyword input', () => {
     render(<FilterPanel filters={defaultFilters} onFilterChange={mockOnFilterChange} />);
-    const input = screen.getByPlaceholderText('e.g. Kathmandu');
-    fireEvent.change(input, { target: { value: 'Kathmandu' } });
-    expect(mockOnFilterChange).toHaveBeenCalledWith({ suburb: 'Kathmandu' });
+    
+    // Check for some default suburbs
+    expect(screen.getByText('Kathmandu')).toBeInTheDocument();
+    expect(screen.getByText('Patan')).toBeInTheDocument();
+
+    // Check for keyword input
+    expect(screen.getByPlaceholderText('Search...')).toBeInTheDocument();
   });
 
-  it('renders price range inputs', () => {
+  it('clicking a suburb button calls onFilterChange with the updated suburbs list', () => {
     render(<FilterPanel filters={defaultFilters} onFilterChange={mockOnFilterChange} />);
-    expect(screen.getByLabelText('Min Price (NPR)')).toBeInTheDocument();
-    expect(screen.getByLabelText('Max Price (NPR)')).toBeInTheDocument();
+    
+    const kathmanduButton = screen.getByText('Kathmandu');
+    fireEvent.click(kathmanduButton);
+    
+    // It should call with { suburbs: 'Kathmandu', suburb: undefined }
+    expect(mockOnFilterChange).toHaveBeenCalledWith({ suburbs: 'Kathmandu', suburb: undefined });
+  });
+
+  it('renders clear all button', () => {
+    render(<FilterPanel filters={defaultFilters} onFilterChange={mockOnFilterChange} />);
+    expect(screen.getByText('Clear all')).toBeInTheDocument();
   });
 });

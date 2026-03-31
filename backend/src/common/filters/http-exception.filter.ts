@@ -18,14 +18,30 @@ export class HttpExceptionFilter implements ExceptionFilter {
 
     if (exception instanceof HttpException) {
       status = exception.getStatus();
-      const exceptionResponse: any = exception.getResponse();
-      message = exceptionResponse.message || exception.message;
-    } else if (exception?.code === 'P2025') {
-      status = HttpStatus.NOT_FOUND;
-      message = 'Not found';
-    } else if (exception?.code === 'P2002') {
-      status = HttpStatus.CONFLICT;
-      message = 'Already exists';
+      const exceptionResponse = exception.getResponse() as
+        | string
+        | { message?: string | string[] };
+      message =
+        typeof exceptionResponse === 'object'
+          ? Array.isArray(exceptionResponse.message)
+            ? exceptionResponse.message[0]
+            : exceptionResponse.message || exception.message
+          : exceptionResponse || exception.message;
+    } else if (
+      typeof exception === 'object' &&
+      exception !== null &&
+      'code' in exception &&
+      typeof exception.code === 'string'
+    ) {
+      if (exception.code === 'P2025') {
+        status = HttpStatus.NOT_FOUND;
+        message = 'Not found';
+      } else if (exception.code === 'P2002') {
+        status = HttpStatus.CONFLICT;
+        message = 'Already exists';
+      } else {
+        console.error(exception);
+      }
     } else {
       console.error(exception);
     }

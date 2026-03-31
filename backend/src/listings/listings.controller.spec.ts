@@ -3,9 +3,13 @@ import { NotFoundException } from '@nestjs/common';
 const createMockListingsService = () => ({
   findAll: jest.fn(),
   findOne: jest.fn(),
-  sanitize: jest.fn((listing: any, isAdmin: boolean) => {
+  sanitize: jest.fn((listing: Record<string, unknown>, isAdmin: boolean) => {
     if (isAdmin) return listing;
-    const { status, internalNotes, ...publicFields } = listing;
+    const {
+      status: _status,
+      internalNotes: _internalNotes,
+      ...publicFields
+    } = listing;
     return publicFields;
   }),
   buildWhereClause: jest.fn(),

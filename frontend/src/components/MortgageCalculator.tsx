@@ -32,9 +32,19 @@ export function MortgageCalculator({ price: initialPrice }: MortgageCalculatorPr
   const totalPayment = useMemo(() => monthlyRepayment * loanTerm * 12, [monthlyRepayment, loanTerm]);
   const totalInterest = useMemo(() => totalPayment - loanAmount, [totalPayment, loanAmount]);
 
+  const [isMounted, setIsMounted] = useState(false);
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
   useEffect(() => {
     setPrice(initialPrice);
   }, [initialPrice]);
+
+  if (!isMounted) {
+    return null; // Prevent SSR hydration errors from Slider injecting script tags
+  }
 
   return (
     <Card className="border-primary/20 bg-card/50 backdrop-blur-sm">
@@ -75,7 +85,7 @@ export function MortgageCalculator({ price: initialPrice }: MortgageCalculatorPr
           </div>
           <Slider 
              value={[depositPercent]} 
-             onValueChange={(vals) => setDepositPercent(vals[0])} 
+             onValueChange={(vals: any) => setDepositPercent(vals[0])} 
              max={100} 
              step={1} 
           />
@@ -88,7 +98,7 @@ export function MortgageCalculator({ price: initialPrice }: MortgageCalculatorPr
           </div>
           <Slider 
              value={[loanTerm]} 
-             onValueChange={(vals) => setLoanTerm(vals[0])} 
+             onValueChange={(vals: any) => setLoanTerm(vals[0])} 
              min={1} 
              max={30} 
              step={1} 

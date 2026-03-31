@@ -1,6 +1,6 @@
 'use client';
 
-import { useParams, useRouter } from 'next/navigation';
+import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -23,7 +23,7 @@ export default function ListingDetailPage() {
   const { data, isLoading, isError } = useListing(id);
   const { user } = useAuth();
 
-  const listing = data?.data || data;
+  const listing = data;
 
   if (isLoading) {
     return (

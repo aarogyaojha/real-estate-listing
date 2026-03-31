@@ -1,14 +1,23 @@
 import { ExtractJwt, Strategy } from 'passport-jwt';
+import { Request } from 'express';
 import { PassportStrategy } from '@nestjs/passport';
 import { Injectable } from '@nestjs/common';
-import { Request } from 'express';
+import { User } from '../../common/interfaces/user.interface';
+import { UserRole } from '@prisma/client';
+
+interface JwtPayload {
+  sub: string;
+  username: string;
+  role: UserRole;
+}
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
   constructor() {
     super({
       jwtFromRequest: ExtractJwt.fromExtractors([
-        (req: Request) => req?.cookies?.access_token,
+        (req: Request) => 
+          (req.cookies as Record<string, string | undefined>)?.access_token ?? null,
       ]),
       ignoreExpiration: false,
       secretOrKey:
@@ -16,11 +25,11 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
     });
   }
 
-  async validate(payload: any) {
-    return {
+  async validate(payload: JwtPayload): Promise<User> {
+    return Promise.resolve({
       userId: payload.sub,
       username: payload.username,
       role: payload.role,
-    };
+    });
   }
 }

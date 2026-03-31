@@ -15,7 +15,11 @@ const mockListing = {
 };
 
 jest.mock('next/link', () => {
-  return ({ children, href }: any) => <a href={href}>{children}</a>;
+  const MockLink = ({ children, href }: { children: React.ReactNode; href: string }) => (
+    <a href={href}>{children}</a>
+  );
+  MockLink.displayName = 'MockLink';
+  return MockLink;
 });
 
 describe('ListingCard', () => {

@@ -9,22 +9,36 @@ import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { AddAgentForm } from '@/components/AddAgentForm';
 
+interface AgentStat {
+  agentId: string;
+  agentName: string;
+  totalListings: number;
+  stats: Array<{ status: string; count: number; avgPrice: number }>;
+}
+
 export default function AdminDashboard() {
   const { user } = useAuth();
-  const [stats, setStats] = useState<any[]>([]);
+  const [stats, setStats] = useState<AgentStat[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const fetchStats = () => {
+  const fetchStats = async () => {
     setLoading(true);
-    apiFetch<any[]>('/agents/stats').then(res => {
+    try {
+      const res = await apiFetch<AgentStat[]>('/agents/stats');
       setStats(Array.isArray(res) ? res : (res as any).data || []);
+    } catch {
+      setStats([]);
+    } finally {
       setLoading(false);
-    }).catch(() => setLoading(false));
+    }
   };
 
   useEffect(() => {
     if (user?.role === 'ADMIN') {
-      fetchStats();
+      const loadData = async () => {
+        await fetchStats();
+      };
+      loadData().catch(console.error);
     }
   }, [user]);
 
@@ -64,7 +78,7 @@ export default function AdminDashboard() {
                     <TableCell>{s.totalListings}</TableCell>
                     <TableCell>
                       <div className="flex flex-wrap gap-2">
-                        {s.stats.map((st: any) => (
+                        {s.stats.map((st) => (
                           <Badge key={st.status} variant="outline" className="text-[10px] uppercase">
                             {st.status}: {st.count}
                           </Badge>

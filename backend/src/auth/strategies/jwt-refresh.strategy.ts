@@ -2,6 +2,7 @@ import { ExtractJwt, Strategy } from 'passport-jwt';
 import { PassportStrategy } from '@nestjs/passport';
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { Request } from 'express';
+import { User } from '../../common/interfaces/user.interface';
 
 @Injectable()
 export class JwtRefreshStrategy extends PassportStrategy(
@@ -21,9 +22,14 @@ export class JwtRefreshStrategy extends PassportStrategy(
     });
   }
 
-  async validate(req: Request, payload: any) {
+  async validate(req: Request, payload: { sub: string }): Promise<User> {
     const refreshToken = req.cookies?.refresh_token;
     if (!refreshToken) throw new UnauthorizedException();
-    return { userId: payload.sub, refreshToken };
+    return Promise.resolve({
+      userId: payload.sub,
+      username: '',
+      role: 'CUSTOMER',
+      refreshToken,
+    } as User);
   }
 }

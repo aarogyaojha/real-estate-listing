@@ -2,7 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { SearchListingsDto } from './dto/search-listings.dto';
 import { CreateListingDto } from './dto/create-listing.dto';
-import { Listing, Prisma, UserRole, ListingStatus } from '@prisma/client';
+import { Listing, Prisma, ListingStatus } from '@prisma/client';
 
 @Injectable()
 export class ListingsService {
@@ -176,11 +176,13 @@ export class ListingsService {
   }
 
   sanitize<T extends Listing>(listing: T, isAdmin: boolean): Partial<T> {
-    const { internalNotes, ...publicFields } = listing;
     if (isAdmin) {
-      return listing;
+      return listing as unknown as Partial<T>;
     }
-    return publicFields as any;
+    const publicFields = { ...listing };
+    // eslint-disable-next-line @typescript-eslint/no-dynamic-delete
+    delete (publicFields as any).internalNotes;
+    return publicFields as unknown as Partial<T>;
   }
 
   async updateStatus(id: string, status: ListingStatus) {
@@ -199,7 +201,7 @@ export class ListingsService {
     const newPrice = Number(dto.price).toFixed(2);
 
     if (dto.price !== undefined && oldPrice !== newPrice) {
-      await (this.prisma as any).listingPriceHistory.create({
+      await this.prisma.listingPriceHistory.create({
         data: {
           listingId: id,
           price: current.price,
@@ -209,32 +211,32 @@ export class ListingsService {
 
     return this.prisma.listing.update({
       where: { id },
-      data: dto as any,
+      data: dto as Prisma.ListingUpdateInput,
     });
   }
 
   async getPriceHistory(id: string) {
-    return (this.prisma as any).listingPriceHistory.findMany({
+    return this.prisma.listingPriceHistory.findMany({
       where: { listingId: id },
       orderBy: { changedAt: 'desc' },
     });
   }
 
   async createSavedSearch(userId: string, name: string, filtersJSON: string) {
-    return (this.prisma as any).savedSearch.create({
+    return this.prisma.savedSearch.create({
       data: { userId, name, filtersJSON },
     });
   }
 
   async getSavedSearches(userId: string) {
-    return (this.prisma as any).savedSearch.findMany({
+    return this.prisma.savedSearch.findMany({
       where: { userId },
       orderBy: { createdAt: 'desc' },
     });
   }
 
   async deleteSavedSearch(userId: string, id: string) {
-    return (this.prisma as any).savedSearch.delete({
+    return this.prisma.savedSearch.delete({
       where: { id, userId },
     });
   }

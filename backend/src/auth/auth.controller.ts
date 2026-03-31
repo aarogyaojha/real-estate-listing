@@ -21,6 +21,7 @@ import { LoginDto } from './dto/login.dto';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { JwtRefreshGuard } from './guards/jwt-refresh.guard';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
+import { User } from '../common/interfaces/user.interface';
 
 @ApiTags('Auth')
 @Controller('auth')
@@ -78,9 +79,10 @@ export class AuthController {
   })
   async refresh(
     @Req() req: Request,
-    @CurrentUser() user: any,
+    @CurrentUser() user: User,
     @Res({ passthrough: true }) res: Response,
   ) {
+    if (!user.refreshToken) return { message: 'no refresh token' };
     const result = await this.authService.refreshTokens(
       user.userId,
       user.refreshToken,
@@ -110,7 +112,7 @@ export class AuthController {
   @ApiOperation({ summary: 'Logout and clear cookies' })
   @ApiResponse({ status: 200, description: 'Logged out successfully' })
   async logout(
-    @CurrentUser() user: any,
+    @CurrentUser() user: User,
     @Res({ passthrough: true }) res: Response,
   ) {
     await this.authService.logout(user.userId);
@@ -125,7 +127,7 @@ export class AuthController {
   @ApiOperation({ summary: 'Get current logged in user' })
   @ApiResponse({ status: 200, description: 'Returns user info' })
   @ApiResponse({ status: 401, description: 'Not authenticated' })
-  getMe(@CurrentUser() user: any) {
+  getMe(@CurrentUser() user: User) {
     return { userId: user.userId, username: user.username, role: user.role };
   }
 }

@@ -30,7 +30,8 @@ import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
-import { PropertyType, UserRole } from '@prisma/client';
+import { User } from '../common/interfaces/user.interface';
+import { PropertyType, UserRole, ListingStatus } from '@prisma/client';
 
 @ApiTags('Listings')
 @Controller('listings')
@@ -44,7 +45,7 @@ export class ListingsController {
   @ApiBody({ type: CreateListingDto })
   @ApiResponse({ status: 201, description: 'Listing created' })
   @ApiResponse({ status: 403, description: 'Insufficient permissions' })
-  async create(@Body() dto: CreateListingDto, @CurrentUser() user: any) {
+  async create(@Body() dto: CreateListingDto, @CurrentUser() user: User) {
     if (user?.role !== UserRole.ADMIN && user?.role !== UserRole.AGENT) {
       throw new ForbiddenException('Insufficient permissions');
     }
@@ -65,7 +66,7 @@ export class ListingsController {
   @ApiQuery({ name: 'limit', required: false, type: Number })
   @ApiResponse({ status: 200, description: 'Paginated listing results' })
   @ApiCookieAuth('access_token')
-  async findAll(@Query() dto: SearchListingsDto, @CurrentUser() user: any) {
+  async findAll(@Query() dto: SearchListingsDto, @CurrentUser() user: User) {
     return this.listingsService.findAll(
       dto,
       user?.role === UserRole.ADMIN,
@@ -108,7 +109,10 @@ export class ListingsController {
   @Roles(UserRole.ADMIN)
   @ApiOperation({ summary: 'Update listing status (Admin only)' })
   @ApiResponse({ status: 200, description: 'Status updated' })
-  async updateStatus(@Param('id') id: string, @Body('status') status: any) {
+  async updateStatus(
+    @Param('id') id: string,
+    @Body('status') status: ListingStatus,
+  ) {
     return this.listingsService.updateStatus(id, status);
   }
 
@@ -117,23 +121,29 @@ export class ListingsController {
   @ApiOperation({ summary: 'Get all listings saved by the current user' })
   @ApiCookieAuth('access_token')
   @ApiResponse({ status: 200, description: 'List of saved listings' })
-  async getSaved(@CurrentUser() user: any) {
+  async getSaved(@CurrentUser() user: User) {
     return this.listingsService.getSaved(user.userId);
   }
 
   @Post('save')
   @UseGuards(JwtAuthGuard)
   @ApiOperation({ summary: 'Toggle save listing for user' })
-  async toggleSave(@Request() req, @Body('listingId') listingId: string) {
-    return this.listingsService.toggleSave(req.user.id, listingId);
+  async toggleSave(
+    @CurrentUser() user: User,
+    @Body('listingId') listingId: string,
+  ) {
+    return this.listingsService.toggleSave(user.userId, listingId);
   }
 
   @Post('saved-searches')
   @UseGuards(JwtAuthGuard)
   @ApiOperation({ summary: 'Save a search' })
-  async createSavedSearch(@Request() req, @Body() dto: CreateSavedSearchDto) {
+  async createSavedSearch(
+    @CurrentUser() user: User,
+    @Body() dto: CreateSavedSearchDto,
+  ) {
     return this.listingsService.createSavedSearch(
-      req.user.id,
+      user.userId,
       dto.name,
       dto.filtersJSON,
     );
@@ -142,15 +152,15 @@ export class ListingsController {
   @Get('saved-searches')
   @UseGuards(JwtAuthGuard)
   @ApiOperation({ summary: 'Get saved searches' })
-  async getSavedSearches(@Request() req) {
-    return this.listingsService.getSavedSearches(req.user.id);
+  async getSavedSearches(@CurrentUser() user: User) {
+    return this.listingsService.getSavedSearches(user.userId);
   }
 
   @Delete('saved-searches/:id')
   @UseGuards(JwtAuthGuard)
   @ApiOperation({ summary: 'Delete a saved search' })
-  async deleteSavedSearch(@Request() req, @Param('id') id: string) {
-    return this.listingsService.deleteSavedSearch(req.user.id, id);
+  async deleteSavedSearch(@CurrentUser() user: User, @Param('id') id: string) {
+    return this.listingsService.deleteSavedSearch(user.userId, id);
   }
 
   @Get(':id')
@@ -160,7 +170,7 @@ export class ListingsController {
   @ApiResponse({ status: 200, type: ListingResponseDto })
   @ApiResponse({ status: 404, description: 'Not found' })
   @ApiCookieAuth('access_token')
-  async findOne(@Param('id') id: string, @CurrentUser() user: any) {
+  async findOne(@Param('id') id: string, @CurrentUser() user: User) {
     return this.listingsService.findOne(
       id,
       user?.role === UserRole.ADMIN,
