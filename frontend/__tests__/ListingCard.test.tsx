@@ -12,6 +12,10 @@ const mockListing = {
   bedrooms: 3,
   bathrooms: 2,
   parkingSpaces: 1,
+  description: 'A nice home in suburbs',
+  postcode: '44600',
+  status: 'ACTIVE',
+  listedAt: '2026-01-01T00:00:00Z'
 };
 
 jest.mock('next/link', () => {

@@ -25,7 +25,7 @@ export default function LoginPage() {
     setLoading(true);
     try {
       const result = await login({ username, password });
-      const user = result.data || result;
+      const user = (result as any).data || (result as any);
       await refresh();
       toast.success(`Welcome back, ${user.username || username}!`);
       router.push('/listings');

@@ -47,12 +47,10 @@ export function AddAgentForm({ onSuccess }: AddAgentFormProps) {
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        <Button className="gap-2">
-          <UserPlus className="w-4 h-4" />
-          Add New Agent
-        </Button>
-      </DialogTrigger>
+      <Button className="gap-2" onClick={() => setOpen(true)}>
+        <UserPlus className="w-4 h-4" />
+        Add New Agent
+      </Button>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle>Add New Agent</DialogTitle>

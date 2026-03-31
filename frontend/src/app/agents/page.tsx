@@ -11,7 +11,7 @@ export default function AgentsPage() {
 
   useEffect(() => {
     fetchAgents().then(res => {
-      setAgents(res.data || res);
+      setAgents(Array.isArray(res) ? res : (res as any).data || []);
       setLoading(false);
     });
   }, []);

@@ -25,7 +25,7 @@ const propTypeColors: Record<string, string> = {
 };
 
 export function ListingCard({ listing, onToggle }: ListingCardProps) {
-  const l = listing.data || listing;
+  const l = (listing as any).data || listing;
   const { user } = useAuthContext();
   const [isSaved, setIsSaved] = useState<boolean>(!!l.isSaved);
   const [saving, setSaving] = useState(false);
