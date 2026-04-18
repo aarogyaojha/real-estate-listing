@@ -1,100 +1,99 @@
-# Real Estate Listing Search Platform
+# Real Estate Listing Engine
 
-A full-stack property search platform built as an engineering assessment. This project implements a secure NestJS backend with JWT authentication and a sophisticated Next.js frontend with property search and management features.
+A production-grade property search and management platform built as a full-stack monorepo. The core engineering challenge: multi-role access where admins, agents, and standard users see different fields on the same listing — without leaking sensitive data across roles.
 
-## Requirements Overview
+Solved with field-level sanitization at the API layer, not the frontend. Agents can't see admin-only fields by filtering in the UI — they're stripped before the response leaves the server.
 
-- Backend API: REST architecture with search, filters, and detailed views.
-- Frontend GUI: Next.js search interface with detailed property views.
-- Database: PostgreSQL with optimized schema and performance indexing.
-- Access Control: Role-based permissions ensuring sensitive data is protected.
-- Quality: Standardized pagination, URL search persistence, and comprehensive testing.
+---
+
+## Architecture decisions worth noting
+
+**Field-level sanitization** — role-based field stripping happens in a NestJS interceptor, not in frontend conditionals. A malicious client can't fetch the raw endpoint and inspect fields they shouldn't see.
+
+**Refresh token rotation** — each token refresh issues a new token and invalidates the previous one via HttpOnly cookies. No tokens in localStorage.
+
+**Search persistence** — active filters are encoded in the URL, so users can bookmark searches and share them. TanStack Query handles optimistic updates so the UI stays responsive during filter changes.
+
+**Seeded test data** — `npx prisma db seed` populates realistic property listings, agents, and user accounts so you can explore the full feature set immediately.
+
+---
 
 ## Features
 
-- Secure Authentication: Session management using HttpOnly cookies and token rotation.
-- Search Persistence: Save and name common filter combinations for quick access.
-- User Favorites: Bookmark properties to a personal collection for later review.
-- Feedback System: Integrated agent rating and review platform.
-- Market Tools: Automated price history tracking and built-in mortgage calculator.
-- Administration: Full dashboard for managing listings and platform agents.
+- Property search with filters: suburb, price range, bedrooms, property type
+- Saved search combinations (named filter sets)
+- User favorites — bookmark properties to a personal collection
+- Agent rating and review system
+- Automated price history tracking per listing
+- Mortgage calculator (built into the listing detail view)
+- Admin dashboard — manage listings and platform agents
+- Full OpenAPI docs at `/api-docs`
 
-## Stack Selection
+---
 
-| Layer | System |
-|-------|-------|
+## Stack
+
+| Layer | Technology |
+|---|---|
 | Backend | NestJS, TypeScript, Prisma ORM |
 | Database | PostgreSQL (Dockerized) |
-| Auth | JWT (Access + Refresh) via Cookies |
-| Frontend | Next.js 14, TypeScript, Tailwind CSS |
-| UI | shadcn/ui library |
+| Auth | JWT (access + refresh) via HttpOnly cookies |
+| Frontend | Next.js 15, TypeScript, TanStack Query |
+| UI | Tailwind CSS, Shadcn/UI |
 | CI/CD | GitHub Actions |
 
-## Getting Started
+---
 
-### Prerequisites
+## Getting started
 
-You will need **Node.js 18+** and **Docker Desktop** installed.
-
-### 1. Database Initialization
+**Prerequisites:** Node.js 18+, Docker Desktop
 
 ```bash
+# 1. Start the database
 docker-compose up -d
-```
 
-### 2. Backend Setup
-
-```bash
+# 2. Backend
 cd backend
 cp .env.example .env
 npm install
 npx prisma migrate dev --name init
 npx prisma db seed
 npm run start:dev
-```
 
-### 3. Frontend Setup
-
-```bash
+# 3. Frontend
 cd ../frontend
 cp .env.example .env.local
 npm install
 npm run dev
 ```
 
-The application will be accessible at `http://localhost:3001`.
+App runs at `http://localhost:3001`. API docs at `http://localhost:3000/api-docs`.
 
-## Credentials
-
-The following accounts are seeded by default:
-
-- Administrator: `aarogyaojha` / `Admin@123`
-- Standard User: `testuser` / `User@123`
-
-## API Usage
-
-The full OpenAPI documentation is available at `http://localhost:3000/api-docs`.
-
-Below are some example API calls to interact with the backend:
-
-**1. Search for Listings (with filters and pagination):**
-```bash
-curl -X GET "http://localhost:3000/listings?suburb=Kathmandu&price_max=50000000&bedrooms=3&page=1&limit=10"
-```
-
-**2. Get a Specific Listing by ID:**
-```bash
-curl -X GET "http://localhost:3000/listings/8c51a92e-5c4d-44a7-8c43-b1d1f5e8e7f1"
-```
-
-**3. Login (Authenticate as an Admin to get access tokens in HttpOnly cookies):**
-```bash
-curl -X POST "http://localhost:3000/auth/login" \
-  -H "Content-Type: application/json" \
-  -d '{"username":"aarogyaojha","password":"Admin@123"}' \
-  -v
-```
-*(The API will return `Set-Cookie` headers containing `access_token` and `refresh_token`)*
+**Default credentials:**
+| Role | Username | Password |
+|---|---|---|
+| Admin | aarogyaojha | Admin@123 |
+| User | testuser | User@123 |
 
 ---
-[MIT](./LICENSE) © 2026 aarogyaojha
+
+## Example API calls
+
+```bash
+# Search listings with filters
+curl "http://localhost:3000/listings?suburb=Kathmandu&price_max=50000000&bedrooms=3&page=1&limit=10"
+
+# Get a specific listing
+curl "http://localhost:3000/listings/8c51a92e-5c4d-44a7-8c43-b1d1f5e8e7f1"
+
+# Authenticate (tokens returned as HttpOnly cookies)
+curl -X POST "http://localhost:3000/auth/login" \
+  -H "Content-Type: application/json" \
+  -d '{"username":"aarogyaojha","password":"Admin@123"}' -v
+```
+
+---
+
+## License
+
+MIT © Aarogya Ojha
